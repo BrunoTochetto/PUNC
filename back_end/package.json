@@ -1,0 +1,35 @@
+{
+  "name": "back_end",
+  "version": "1.0.0",
+  "description": "Back end do projeto PUNC",
+  "keywords": [
+    "backend;",
+    "geolocalização;",
+    "express;"
+  ],
+  "homepage": "https://github.com/BrunoTochetto/PUNC#readme",
+  "bugs": {
+    "url": "https://github.com/BrunoTochetto/PUNC/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrunoTochetto/PUNC.git"
+  },
+  "license": "ISC",
+  "author": "Bruno Tochetto; Arthur Sobral; Caroline França; Nicoly Sá; Emmanuelle Paola.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.8.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "websocket": "^1.0.35"
+  }
+}
