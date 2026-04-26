@@ -197,7 +197,8 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-# .env
+**/.env
+.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -262,3 +263,7 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+back_end/.env
+back_end/.env
+back_end/.env
+punc/lib/nucleo/segredos/segredos.env
