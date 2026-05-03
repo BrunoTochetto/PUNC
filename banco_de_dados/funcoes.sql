@@ -40,26 +40,26 @@ BEGIN
     v_regiao_y := floor(ST_Y(v_geom_3857) / v_regiao_tamanho_m)::bigint;
 
     -- Região (idempotente)
-    INSERT INTO regioes (regiao_x, regiao_y)
+    INSERT INTO regioes (region_x, region_y)
     VALUES (v_regiao_x, v_regiao_y)
-    ON CONFLICT (regiao_x, regiao_y) DO NOTHING;
+    ON CONFLICT (region_x, region_y) DO NOTHING;
 
     SELECT id
       INTO v_id_regiao
       FROM regioes
-     WHERE regiao_x = v_regiao_x
-       AND regiao_y = v_regiao_y;
+     WHERE region_x = v_regiao_x
+       AND region_y = v_regiao_y;
 
     -- Célula (idempotente)
-    INSERT INTO celulas (celula_x, celula_y)
-    VALUES (v_celula_x, v_celula_y)
-    ON CONFLICT (celula_x, celula_y) DO NOTHING;
+    INSERT INTO celulas (cell_x, cell_y, id_regiao)
+    VALUES (v_celula_x, v_celula_y, v_id_regiao)
+    ON CONFLICT (cell_x, cell_y) DO NOTHING;
 
     SELECT id
       INTO v_id_celula
       FROM celulas
-     WHERE celula_x = v_celula_x
-       AND celula_y = v_celula_y;
+     WHERE cell_x = v_celula_x
+       AND cell_y = v_celula_y;
 
     -- Atribuição no usuário
     NEW.id_regiao := v_id_regiao;
@@ -86,7 +86,6 @@ RETURNS TABLE (
     celula_x BIGINT,
     celula_y BIGINT,
     quantidade_usuarios BIGINT,
-    possui_usuarios BOOLEAN,
     distancia_borda_m DOUBLE PRECISION,
     distancia_centro_m DOUBLE PRECISION
 )
@@ -115,12 +114,11 @@ candidate_cells AS (
         v.cell_x AS celula_x,
         v.cell_y AS celula_y,
         v.quantidade_usuarios,
-        v.possui_usuarios,
         v.cell_geom_3857,
         v.cell_centroid_3857,
         rb.geom_3857 AS search_geom_3857
     FROM region_bounds rb
-    JOIN vw_usuarios_em_celula v
+    JOIN celulas_no_mapa v
       ON v.region_x BETWEEN rb.min_region_x AND rb.max_region_x
      AND v.region_y BETWEEN rb.min_region_y AND rb.max_region_y
 ),
@@ -132,7 +130,6 @@ filtered_cells AS (
         cc.celula_x,
         cc.celula_y,
         cc.quantidade_usuarios,
-        cc.possui_usuarios,
 
         ST_Distance(cc.search_geom_3857, cc.cell_geom_3857) AS distancia_borda_m,
         ST_Distance(cc.search_geom_3857, cc.cell_centroid_3857) AS distancia_centro_m
@@ -146,7 +143,6 @@ SELECT
     celula_x,
     celula_y,
     quantidade_usuarios,
-    possui_usuarios,
     distancia_borda_m,
     distancia_centro_m
 FROM filtered_cells

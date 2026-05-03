@@ -1,6 +1,5 @@
 -- =========================================================
 -- 1) Todas as localizações pertencentes às trajetórias
--- View: vw_localizacoes_de_trajetos
 -- =========================================================
 CREATE OR REPLACE VIEW vw_localizacoes_de_trajetos AS
 SELECT
@@ -59,7 +58,6 @@ LEFT JOIN gerentes g
 
 -- =========================================================
 -- 2) Todos os motoristas de um gerente
--- View: vw_motoristas_de_gerentes
 -- =========================================================
 CREATE OR REPLACE VIEW vw_motoristas_de_gerentes AS
 SELECT
@@ -78,7 +76,6 @@ LEFT JOIN motoristas m
 
 -- =========================================================
 -- 3) Todos os trajetos do motorista
--- View: vw_trajetos_de_motorista
 -- =========================================================
 CREATE OR REPLACE VIEW vw_trajetos_de_motorista AS
 SELECT
@@ -108,40 +105,60 @@ GROUP BY
 
 
 -- =========================================================
--- 4) Quantidade de usuários por célula
--- View: vw_usuarios_em_celula
+-- 4) View: vw_usuarios_em_celula — uma linha por célula (contagem + geometria da grade)
+--     Usada por achar_celulas_em_raio (JOIN nesta view).
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_celula AS
 SELECT
     c.id AS id_celula,
     c.cell_x,
     c.cell_y,
+    r.region_x,
+    r.region_y,
     c.ultima_atualizacao,
-    COUNT(u.id) AS quantidade_usuarios
+    COUNT(u.id) AS quantidade_usuarios,
+    ST_MakeEnvelope(
+        c.cell_x * 100::double precision,
+        c.cell_y * 100::double precision,
+        (c.cell_x + 1) * 100::double precision,
+        (c.cell_y + 1) * 100::double precision,
+        3857
+    ) AS cell_geom_3857,
+    ST_Centroid(
+        ST_MakeEnvelope(
+            c.cell_x * 100::double precision,
+            c.cell_y * 100::double precision,
+            (c.cell_x + 1) * 100::double precision,
+            (c.cell_y + 1) * 100::double precision,
+            3857
+        )
+    ) AS cell_centroid_3857
 FROM celulas c
+LEFT JOIN regioes r
+    ON r.id = c.id_regiao
 LEFT JOIN usuarios u
     ON u.id_celula = c.id
 GROUP BY
     c.id,
     c.cell_x,
     c.cell_y,
+    r.region_x,
+    r.region_y,
     c.ultima_atualizacao;
 
 
 -- =========================================================
--- 5) Quantidade de usuários por região
--- View: vw_usuarios_em_regiao
+-- 5) View: vw_usuarios_em_regiao — uma linha por usuário na região
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_regiao AS
 SELECT
     r.id AS id_regiao,
     r.region_x,
     r.region_y,
-    COUNT(u.id) AS quantidade_usuarios
+    u.id AS id_usuario,
+    u.nome_dispositivo,
+    u.mac,
+    u.created_at
 FROM regioes r
 LEFT JOIN usuarios u
-    ON u.id_regiao = r.id
-GROUP BY
-    r.id,
-    r.region_x,
-    r.region_y;
+    ON u.id_regiao = r.id;

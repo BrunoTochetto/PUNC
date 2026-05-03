@@ -1,5 +1,15 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
+/* 
+TABELAS
+*/
+-- agrupamento menor (1000m x 1000m)
+CREATE TABLE regioes (
+    id BIGSERIAL PRIMARY KEY,
+    region_x BIGINT NOT NULL,
+    region_y BIGINT NOT NULL
+);
+
 -- agrupamento menor (100m x 100m)
 CREATE TABLE celulas (
     id BIGSERIAL PRIMARY KEY,
@@ -11,13 +21,6 @@ CREATE TABLE celulas (
     CONSTRAINT fk_regiao
     FOREIGN KEY (id_regiao) 
     REFERENCES regioes(id)
-);
-
--- agrupamento menor (1000m x 1000m)
-CREATE TABLE regioes (
-    id BIGSERIAL PRIMARY KEY,
-    region_x BIGINT NOT NULL,
-    region_y BIGINT NOT NULL
 );
 
 CREATE TABLE usuarios (
@@ -89,11 +92,15 @@ CREATE TABLE localizacao_trajetorias (
     data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+/* 
+INDICES
+*/
+
 CREATE UNIQUE INDEX idx_regioes_xy
-ON regioes (regiao_x, regiao_y);
+ON regioes (region_x, region_y);
 
 CREATE UNIQUE INDEX idx_celulas_xy
-ON celulas (celula_x, celula_y);
+ON celulas (cell_x, cell_y);
 
 CREATE INDEX idx_usuarios_geom_geog
 ON usuarios
@@ -109,9 +116,12 @@ ON usuarios (id_celula);
 CREATE INDEX idx_usuarios_regiao
 ON usuarios (id_regiao);
 
+/* 
+VIEWS (antes das funções: funções SQL validam relações referenciadas na criação)
+*/
+
 -- =========================================================
 -- 1) Todas as localizações pertencentes às trajetórias
--- View: vw_localizacoes_de_trajetos
 -- =========================================================
 CREATE OR REPLACE VIEW vw_localizacoes_de_trajetos AS
 SELECT
@@ -170,7 +180,6 @@ LEFT JOIN gerentes g
 
 -- =========================================================
 -- 2) Todos os motoristas de um gerente
--- View: vw_motoristas_de_gerentes
 -- =========================================================
 CREATE OR REPLACE VIEW vw_motoristas_de_gerentes AS
 SELECT
@@ -189,7 +198,6 @@ LEFT JOIN motoristas m
 
 -- =========================================================
 -- 3) Todos os trajetos do motorista
--- View: vw_trajetos_de_motorista
 -- =========================================================
 CREATE OR REPLACE VIEW vw_trajetos_de_motorista AS
 SELECT
@@ -219,43 +227,66 @@ GROUP BY
 
 
 -- =========================================================
--- 4) Quantidade de usuários por célula
--- View: vw_usuarios_em_celula
+-- 4) vw_usuarios_em_celula — uma linha por célula (contagem + geometria; uso em achar_celulas_em_raio)
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_celula AS
 SELECT
     c.id AS id_celula,
     c.cell_x,
     c.cell_y,
+    r.region_x,
+    r.region_y,
     c.ultima_atualizacao,
-    COUNT(u.id) AS quantidade_usuarios
+    COUNT(u.id) AS quantidade_usuarios,
+    ST_MakeEnvelope(
+        c.cell_x * 100::double precision,
+        c.cell_y * 100::double precision,
+        (c.cell_x + 1) * 100::double precision,
+        (c.cell_y + 1) * 100::double precision,
+        3857
+    ) AS cell_geom_3857,
+    ST_Centroid(
+        ST_MakeEnvelope(
+            c.cell_x * 100::double precision,
+            c.cell_y * 100::double precision,
+            (c.cell_x + 1) * 100::double precision,
+            (c.cell_y + 1) * 100::double precision,
+            3857
+        )
+    ) AS cell_centroid_3857
 FROM celulas c
+LEFT JOIN regioes r
+    ON r.id = c.id_regiao
 LEFT JOIN usuarios u
     ON u.id_celula = c.id
 GROUP BY
     c.id,
     c.cell_x,
     c.cell_y,
+    r.region_x,
+    r.region_y,
     c.ultima_atualizacao;
 
 
 -- =========================================================
--- 5) Quantidade de usuários por região
--- View: vw_usuarios_em_regiao
+-- 5) vw_usuarios_em_regiao — uma linha por usuário na região
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_regiao AS
 SELECT
     r.id AS id_regiao,
     r.region_x,
     r.region_y,
-    COUNT(u.id) AS quantidade_usuarios
+    u.id AS id_usuario,
+    u.nome_dispositivo,
+    u.mac,
+    u.created_at
 FROM regioes r
 LEFT JOIN usuarios u
-    ON u.id_regiao = r.id
-GROUP BY
-    r.id,
-    r.region_x,
-    r.region_y;
+    ON u.id_regiao = r.id;
+
+/* 
+FUNÇÕES
+*/
 
 CREATE OR REPLACE FUNCTION trg_usuarios_set_grid()
 RETURNS trigger
@@ -299,26 +330,26 @@ BEGIN
     v_regiao_y := floor(ST_Y(v_geom_3857) / v_regiao_tamanho_m)::bigint;
 
     -- Região (idempotente)
-    INSERT INTO regioes (regiao_x, regiao_y)
+    INSERT INTO regioes (region_x, region_y)
     VALUES (v_regiao_x, v_regiao_y)
-    ON CONFLICT (regiao_x, regiao_y) DO NOTHING;
+    ON CONFLICT (region_x, region_y) DO NOTHING;
 
     SELECT id
       INTO v_id_regiao
       FROM regioes
-     WHERE regiao_x = v_regiao_x
-       AND regiao_y = v_regiao_y;
+     WHERE region_x = v_regiao_x
+       AND region_y = v_regiao_y;
 
     -- Célula (idempotente)
-    INSERT INTO celulas (celula_x, celula_y)
-    VALUES (v_celula_x, v_celula_y)
-    ON CONFLICT (celula_x, celula_y) DO NOTHING;
+    INSERT INTO celulas (cell_x, cell_y, id_regiao)
+    VALUES (v_celula_x, v_celula_y, v_id_regiao)
+    ON CONFLICT (cell_x, cell_y) DO NOTHING;
 
     SELECT id
       INTO v_id_celula
       FROM celulas
-     WHERE celula_x = v_celula_x
-       AND celula_y = v_celula_y;
+     WHERE cell_x = v_celula_x
+       AND cell_y = v_celula_y;
 
     -- Atribuição no usuário
     NEW.id_regiao := v_id_regiao;
@@ -327,11 +358,6 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
-
-
-
-
 
 CREATE OR REPLACE FUNCTION achar_celulas_em_raio(
     p_lat DOUBLE PRECISION,
@@ -345,7 +371,6 @@ RETURNS TABLE (
     celula_x BIGINT,
     celula_y BIGINT,
     quantidade_usuarios BIGINT,
-    possui_usuarios BOOLEAN,
     distancia_borda_m DOUBLE PRECISION,
     distancia_centro_m DOUBLE PRECISION
 )
@@ -374,7 +399,6 @@ candidate_cells AS (
         v.cell_x AS celula_x,
         v.cell_y AS celula_y,
         v.quantidade_usuarios,
-        v.possui_usuarios,
         v.cell_geom_3857,
         v.cell_centroid_3857,
         rb.geom_3857 AS search_geom_3857
@@ -391,7 +415,6 @@ filtered_cells AS (
         cc.celula_x,
         cc.celula_y,
         cc.quantidade_usuarios,
-        cc.possui_usuarios,
 
         ST_Distance(cc.search_geom_3857, cc.cell_geom_3857) AS distancia_borda_m,
         ST_Distance(cc.search_geom_3857, cc.cell_centroid_3857) AS distancia_centro_m
@@ -405,7 +428,6 @@ SELECT
     celula_x,
     celula_y,
     quantidade_usuarios,
-    possui_usuarios,
     distancia_borda_m,
     distancia_centro_m
 FROM filtered_cells
@@ -417,6 +439,10 @@ ORDER BY
     celula_y,
     celula_x;
 $$;
+
+/* 
+TRIGGERS
+*/
 
 CREATE TRIGGER usuarios_set_grid_before_ins_upd
 BEFORE INSERT OR UPDATE OF geom

@@ -1,5 +1,12 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
+-- agrupamento menor (1000m x 1000m)
+CREATE TABLE regioes (
+    id BIGSERIAL PRIMARY KEY,
+    region_x BIGINT NOT NULL,
+    region_y BIGINT NOT NULL
+);
+
 -- agrupamento menor (100m x 100m)
 CREATE TABLE celulas (
     id BIGSERIAL PRIMARY KEY,
@@ -11,13 +18,6 @@ CREATE TABLE celulas (
     CONSTRAINT fk_regiao
     FOREIGN KEY (id_regiao) 
     REFERENCES regioes(id)
-);
-
--- agrupamento menor (1000m x 1000m)
-CREATE TABLE regioes (
-    id BIGSERIAL PRIMARY KEY,
-    region_x BIGINT NOT NULL,
-    region_y BIGINT NOT NULL
 );
 
 CREATE TABLE usuarios (

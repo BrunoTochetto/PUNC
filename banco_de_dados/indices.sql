@@ -1,8 +1,8 @@
 CREATE UNIQUE INDEX idx_regioes_xy
-ON regioes (regiao_x, regiao_y);
+ON regioes (region_x, region_y);
 
 CREATE UNIQUE INDEX idx_celulas_xy
-ON celulas (celula_x, celula_y);
+ON celulas (cell_x, cell_y);
 
 CREATE INDEX idx_usuarios_geom_geog
 ON usuarios

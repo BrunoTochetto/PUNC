@@ -6,8 +6,8 @@ Será um projeto focado na notificação urbana da coleta de lixo baseando-se em
 Todas as ações criadas neste repositório são baseadas no pré-projeto da PUNC, não disponível publicamente.
 
 ### Integrantes do grupo:
-- Arthur Sobral da Costa
+- Arthur Sobral da Costa 
 - Bruno Tochetto
-- Caroline França
-- Emmanuelle
-- Nicoly
+- Caroline Fernanda França 
+- Emmanuelle Paola da Silva 
+- Nicoly Quechini de Sá 
