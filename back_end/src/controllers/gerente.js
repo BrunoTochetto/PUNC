@@ -1,27 +1,17 @@
-export const login = async (req, res) => {
+async function login(req, res){
   res.json({ mensagem: "Login funcionando" });
 };
 
-export const listarMotoristas = async (req, res) => {
+async function listarMotoristas(req, res){
   res.json({ mensagem: "Lista de motoristas" });
 };
 
-export const criarMotorista = async (req, res) => {
+async function criarMotorista(req, res){
   res.json({ mensagem: "Motorista criado" });
 };
 
-export const deletarMotorista = async (req, res) => {
+async function deletarMotorista(req, res){
   res.json({ mensagem: "Motorista deletado" });
 };
 
-export const listarHorarios = async (req, res) => {
-  res.json({ mensagem: "Horários listados" });
-};
-
-export const criarHorario = async (req, res) => {
-  res.json({ mensagem: "Horário criado" });
-};
-
-export const editarHorario = async (req, res) => {
-  res.json({ mensagem: "Horário atualizado" });
-};
+export {deletarMotorista, criarMotorista, listarMotoristas, login}

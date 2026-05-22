@@ -3,13 +3,10 @@ import * as controller from '../controllers/motorista.js';
 
 const router = express.Router();
 
-// ativos
-router.get('/motoristas/ativos', controller.ativos);
+router.get('/ativos', controller.ativos);
 
-// atualizar status
-router.patch('/motoristas/:id/status', controller.status);
+router.patch('/:id/status', controller.status);
 
-// mapa
-router.get('/mapa/emPercurso', controller.emPercurso);
+router.patch('/acharTodosEmRaio', controller.acharTodosEmRaio);
 
 export default router;
