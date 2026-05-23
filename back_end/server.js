@@ -19,7 +19,7 @@ app.use(json());
 // USAR ROTAS
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/gerente', gerenteRoutes);
-app.use('/api/motoristas', motoristaRoutes);
+app.use('/api/motorista', motoristaRoutes);
 app.use('/api/mapa', mapaRoutes);
 app.use('/api/horariosColeta', horarioColetaRoutes);
 
@@ -29,7 +29,6 @@ app.get('/status', (req, res) => {
 
 
 const PORT = process.env.PORT || 1000;
-console.log(process)
 app.listen(PORT, () => {
     console.log(`Server rodando na porta: ${PORT}`);
 });
