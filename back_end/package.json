@@ -31,6 +31,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.21.0",
-    "websocket": "^1.0.35"
+    "websocket": "^1.0.35",
+    "winston": "^3.19.0"
   }
 }

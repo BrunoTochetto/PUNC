@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
+import { logInfo } from './src/models/logErrors.js';
 
 import usuarioRoutes from './src/routes/usuario.js';
 import gerenteRoutes from './src/routes/gerente.js';
@@ -30,5 +31,6 @@ app.get('/status', (req, res) => {
 
 const PORT = process.env.PORT || 1000;
 app.listen(PORT, () => {
-    console.log(`Server rodando na porta: ${PORT}`);
+    // console.log(`Server rodando na porta: ${PORT}`);
+    logInfo(`Server rodando na porta: ${PORT}`);
 });

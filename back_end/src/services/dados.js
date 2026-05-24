@@ -76,4 +76,29 @@ class Coordenadas {
 	}
 }
 
+class CEP {
+	constructor(cep) {
+		const cepFormatado = this.isValido(cep);
+
+		this.cep = cepFormatado;
+	}
+
+	static isValido(cep) {
+		const cepFormatado = cep.replace('-', '').trim();
+
+		if (cepFormatado.length > 8) {
+			const erro = new Error(
+				`Formato de CEP inválido: ${cep} - ${cepFormatado}. Use o formato 12345-123 ou menos, para menos precisão.`
+			);
+			logAviso(`CEP: ${erro.message}`, erro);
+			return false
+		};
+
+	}
+
+	get value() {
+		return this.cep
+	}
+}
+
 export { MACAddress, Coordenadas };

@@ -89,3 +89,12 @@ CREATE TABLE localizacao_trajetorias (
     data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE area_de_atuacao (
+    id SERIAL PRIMARY KEY,
+    id_gerente INT,
+    cep VARCHAR(9),
+
+    CONSTRAINT fk_gerente
+    FOREIGN KEY (id_gerente) 
+    REFERENCES gerentes(id)
+);

@@ -1,21 +1,64 @@
-import { promises as fs } from 'node:fs';
+import winston from 'winston';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Caminho do diretório de logs
-const logsDir = path.join(process.cwd(), '../logs');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const logsDir = path.join(__dirname, '../../logs');
 
-// Auxiliares
-async function criarDiretorioLogsSeNaoExistir() {
-    try {
-      await fs.mkdir(logsDir, { recursive: true });
-    } catch (error) {
-      console.error('Erro ao criar diretório de logs:', error.message);
-    }
+// Função para gerar nome do arquivo de log com a data do dia
+function gerarNomeArquivoLog(prefix = 'log') {
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const ano = agora.getFullYear();
+  return `${prefix}-${ano}-${mes}-${dia}.log`;
 }
 
+// Configurar o logger com winston
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.printf(({ timestamp, level, message, ...meta }) => {
+      let logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+      
+      // Se houver informações adicionais de erro, adicionar ao log
+      if (meta.error) {
+        logMessage += `\n Tipo: ${meta.error.name || 'Desconhecido'}`;
+        logMessage += `\n Mensagem: ${meta.error.message || 'Sem mensagem'}`;
+        if (meta.error.stack) {
+          logMessage += `\n Stack Trace:\n${meta.error.stack}`;
+        }
+      }
+      
+      logMessage += '\n' + '='.repeat(80);
+      return logMessage;
+    })
+  ),
+  defaultMeta: { service: 'punc-api' },
+  transports: [
+    // Write all errors (level 'error' and below) to 'error-YYYY-MM-DD.log'
+    new winston.transports.File({ 
+      filename: path.join(logsDir, gerarNomeArquivoLog('error')), 
+      level: 'error' 
+    }),
+    // Write all logs to 'log-YYYY-MM-DD.log'
+    new winston.transports.File({ 
+      filename: path.join(logsDir, gerarNomeArquivoLog('log')) 
+    }),
+  ],
+});
 
+// Se em desenvolvimento, também logar no console
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
+}
+
+// Auxiliares
 function formatarDataHora(agora) {
-    
     return agora.toLocaleString('pt-BR', {
       year: 'numeric',
       month: '2-digit',
@@ -27,44 +70,22 @@ function formatarDataHora(agora) {
 }
 
 // Função principal de log
-async function logErro(message, error = null, level = 'ERROR') {
+function logErro(message, error = null, level = 'error') {
     try {
-      await criarDiretorioLogsSeNaoExistir();
-      const agora = new Date();
-      const timestamp = formatarDataHora(agora);
-      
-      let logMessage = `[${timestamp}] [${level}] ${message}`;
-      
-      if (error) {
-          logMessage += `\n Tipo: ${error.name || 'Desconhecido'}`;
-          logMessage += `\n Mensagem: ${error.message || 'Sem mensagem'}`;
-          if (error.stack) {
-            logMessage += `\n Stack Trace:\n${error.stack}`;
-          }
-      }
-      
-      logMessage += '\n' + '='.repeat(80) + '\n';
-
-      // Escrever no arquivo de log
-      const logFile = path.join(logsDir, 'log.txt');
-      await fs.appendFile(logFile, logMessage, 'utf-8');
-
-      // Também exibir no console
-      console.log(logMessage);
-
+      const logData = error ? { error } : {};
+      logger.log(level, message, logData);
     } catch (fileError) {
       console.error('Erro ao escrever no arquivo de log:', fileError.message);
     }
 }
 
-// Função auxiliar para outro tipos de logs
-async function logAviso(message, error = null) {
-    await logErro(message, error, 'WARNING');
+// Função auxiliar para outros tipos de logs
+function logAviso(message, error = null) {
+    logErro(message, error, 'warn');
 }
 
-async function logInfo(message) {
-
-    await logErro(message, null, 'INFO');
+function logInfo(message) {
+    logErro(message, null, 'info');
 }
 
-export { logErro, logAviso, logInfo };
+export { logErro, logAviso, logInfo, logger };
