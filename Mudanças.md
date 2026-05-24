@@ -1,15 +1,17 @@
 # Mudanças que serão feitas comparado com o pré projeto
 
-### Será adicionada mais uma tabela chamada "areaDeAtuação" e a coluna "id_areaAtuacao" para o gerente.
+### Será adicionada mais uma tabela chamada "area_de_atuacao".
 
-Para o usuário não receber todos os horários de coleta e motoristas registrados (e para uma certa optimização), será criado a tabela area_de_atuacao com um CEP. Os gerentes então vão colocar quantos CEPs forem necessários para mover sua área de atuação, isso com o CEP. Segundo o [site dos correios](https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep), o CEP será utilizado de qualquer forma conforme as necessidades do gerente.
+Para o usuário não receber todos os horários de coleta e motoristas registrados no mapa --- (e para uma certa optimização), será criado a tabela area_de_atuacao com um CEP. Os gerentes então colocarão quantos CEPs forem necessários para sua área de atuação, isso com o CEP. Segundo o [site dos correios](https://www.correios.com.br/enviar/precisa-de-ajuda/tudo-sobre-cep), o CEP será utilizado de qualquer forma conforme as necessidades do gerente.
 
 Por exemplo, se a empresa atua no estado de São Paulo inteiro, o gerente apenas colocará "1" no CEP, correspondente ao estado de São Paulo.
 
 Se a empresa apenas atua em Concórdia, será o CEP 897.
 
+Também deverá colocar área de atuação em horarios de coleta, mas ainda tem que pensar sobre isso.
+
 [Ainda em pesquisa]
-Se nós não conseguirmos transformar Coordenadas geográficas para CEP, o usuário terá q colocar seu CEP... Se for o caso, a localização por parte do usuário não servirá de nada.
+Transformar coordenadas em CEP
 
 
 ### Criação de um sistema de Log
