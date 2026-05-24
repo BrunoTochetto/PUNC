@@ -11,7 +11,7 @@ const pool = new Pool({
   password: process.env.PGPASSWORD,
 });
 
-async function querry(query, args) {
+async function querry(query, args = []) {
   try {
     const resultado = await pool.query(query, args);
     return resultado;

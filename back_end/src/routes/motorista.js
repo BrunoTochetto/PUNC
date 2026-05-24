@@ -1,11 +1,13 @@
 import express from 'express';
 import * as controller from '../controllers/motorista.js';
+import { autenticacaoNecessaria } from '../middlewares/autenticacao.js';
 
 const router = express.Router();
 
 router.get('/ativos', controller.ativos);
 
-router.patch('/:id/status', controller.status);
+router.patch('/:id/status', autenticacaoNecessaria, controller.status);
+
 
 router.patch('/acharTodosEmRaio', controller.acharTodosEmRaio);
 

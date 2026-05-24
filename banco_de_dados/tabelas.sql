@@ -50,7 +50,9 @@ CREATE TABLE gerentes (
     id SERIAL PRIMARY KEY,
     nome_usuario VARCHAR(255) NOT NULL,
     senha_criptografada VARCHAR(255) NOT NULL,
-    email VARCHAR(255)
+    email VARCHAR(255),
+
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE motoristas (
@@ -63,17 +65,22 @@ CREATE TABLE motoristas (
 
     CONSTRAINT fk_gerente 
     FOREIGN KEY (id_gerente) 
-    REFERENCES gerentes(id)
+    REFERENCES gerentes(id),
+
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE trajetorias (
     id SERIAL PRIMARY KEY,
     id_motorista INT,
+    tipo_lixo VARCHAR(11),
 
     CONSTRAINT fk_motorista
     FOREIGN KEY (id_motorista) 
     REFERENCES motoristas(id),
-    tempo_comeco TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+    tempo_comeco TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tempo_fim TIMESTAMPTZ
 );
 
 CREATE TABLE localizacao_trajetorias (
@@ -98,3 +105,22 @@ CREATE TABLE area_de_atuacao (
     FOREIGN KEY (id_gerente) 
     REFERENCES gerentes(id)
 );
+
+CREATE TABLE horarios_coleta (
+    id SERIAL PRIMARY KEY,
+    id_gerente INT,
+    id_area_atuacao INT,
+    horario_estimado TIMESTAMPTZ NOT NULL,
+    dia_semana VARCHAR(127),
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tipo_lixo VARCHAR(11),
+    comentarios VARCHAR(255),
+
+    CONSTRAINT fk_gerente
+    FOREIGN KEY (id_gerente) 
+    REFERENCES gerentes(id),
+
+    CONSTRAINT fk_area_coleta
+    FOREIGN KEY (id_area_atuacao) 
+    REFERENCES area_de_atuacao(id)
+)

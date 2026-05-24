@@ -6,5 +6,4 @@ const router = express.Router();
 // Usuario
 router.post('/cadastro', controller.cadastro);
 
-
 export default router;

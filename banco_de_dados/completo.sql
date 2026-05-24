@@ -3,6 +3,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 /* 
 TABELAS
 */
+
 -- agrupamento menor (1000m x 1000m)
 CREATE TABLE regioes (
     id BIGSERIAL PRIMARY KEY,
@@ -53,7 +54,9 @@ CREATE TABLE gerentes (
     id SERIAL PRIMARY KEY,
     nome_usuario VARCHAR(255) NOT NULL,
     senha_criptografada VARCHAR(255) NOT NULL,
-    email VARCHAR(255)
+    email VARCHAR(255),
+
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE motoristas (
@@ -66,17 +69,22 @@ CREATE TABLE motoristas (
 
     CONSTRAINT fk_gerente 
     FOREIGN KEY (id_gerente) 
-    REFERENCES gerentes(id)
+    REFERENCES gerentes(id),
+
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE trajetorias (
     id SERIAL PRIMARY KEY,
     id_motorista INT,
+    tipo_lixo VARCHAR(11),
 
     CONSTRAINT fk_motorista
     FOREIGN KEY (id_motorista) 
     REFERENCES motoristas(id),
-    tempo_comeco TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+    tempo_comeco TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tempo_fim TIMESTAMPTZ
 );
 
 CREATE TABLE localizacao_trajetorias (
@@ -90,6 +98,35 @@ CREATE TABLE localizacao_trajetorias (
     geom_3857 geometry(Point, 3857) NOT NULL,
 
     data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE area_de_atuacao (
+    id SERIAL PRIMARY KEY,
+    id_gerente INT,
+    cep VARCHAR(9),
+
+    CONSTRAINT fk_gerente
+    FOREIGN KEY (id_gerente) 
+    REFERENCES gerentes(id)
+);
+
+CREATE TABLE horarios_coleta (
+    id SERIAL PRIMARY KEY,
+    id_gerente INT,
+    id_area_atuacao INT,
+    horario_estimado TIMESTAMPTZ NOT NULL,
+    dia_semana VARCHAR(127),
+    data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tipo_lixo VARCHAR(11),
+    comentarios VARCHAR(255),
+
+    CONSTRAINT fk_gerente
+    FOREIGN KEY (id_gerente) 
+    REFERENCES gerentes(id),
+
+    CONSTRAINT fk_area_coleta
+    FOREIGN KEY (id_area_atuacao) 
+    REFERENCES area_de_atuacao(id)
 );
 
 /* 
@@ -117,7 +154,7 @@ CREATE INDEX idx_usuarios_regiao
 ON usuarios (id_regiao);
 
 /* 
-VIEWS (antes das funções: funções SQL validam relações referenciadas na criação)
+VIEWS
 */
 
 -- =========================================================
@@ -269,7 +306,7 @@ GROUP BY
 
 
 -- =========================================================
--- 5) vw_usuarios_em_regiao — uma linha por usuário na região
+-- 5) Uma linha por usuário na região
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_regiao AS
 SELECT
@@ -283,6 +320,44 @@ SELECT
 FROM regioes r
 LEFT JOIN usuarios u
     ON u.id_regiao = r.id;
+
+
+-- =========================================================
+-- 6) Todas as áreas de atuação de um gerente
+-- =========================================================
+CREATE OR REPLACE VIEW vw_areas_de_atuacao_de_gerentes AS
+SELECT
+    g.id AS id_gerente,
+    g.nome_usuario AS nome_gerente,
+    g.email,
+    a.id AS id_area_atuacao,
+    a.cep
+FROM gerentes g
+LEFT JOIN area_de_atuacao a
+    ON a.id_gerente = g.id;
+
+
+-- =========================================================
+-- 7) Horários de coleta com gerente e área (CEP)
+-- =========================================================
+CREATE OR REPLACE VIEW vw_horarios_coleta AS
+SELECT
+    hc.id AS id_horario,
+    hc.horario_estimado,
+    hc.dia_semana,
+    hc.data_criacao,
+    hc.tipo_lixo,
+    hc.comentarios,
+    g.id AS id_gerente,
+    g.nome_usuario AS nome_gerente,
+    g.email AS email_gerente,
+    a.id AS id_area_atuacao,
+    a.cep
+FROM horarios_coleta hc
+JOIN gerentes g
+    ON g.id = hc.id_gerente
+LEFT JOIN area_de_atuacao a
+    ON a.id = hc.id_area_atuacao;
 
 /* 
 FUNÇÕES
@@ -358,6 +433,8 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+
+
 
 CREATE OR REPLACE FUNCTION achar_celulas_em_raio(
     p_lat DOUBLE PRECISION,

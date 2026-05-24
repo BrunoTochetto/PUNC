@@ -1,11 +1,19 @@
+/*
+* [Recebe]: id_gerente, cep
+* [Retorna]: Os motoristas
+*/
 async function ativos(req, res){
   res.json({ mensagem: "Motoristas ativos" });
 };
-
+/*
+* [Recebe]: id_motorista, novo status (Em percurso ou Inativo)
+* [Retorna]: Mensagem de confirmação
+*/
 async function status(req, res){
   res.json({ mensagem: "Status atualizado" });
 };
 
+// ! Testes
 async function acharTodosEmRaio(latitude, longitude, raioM) {
   const sql = `
     SELECT * FROM achar_todos_em_raio($1, $2, $3);

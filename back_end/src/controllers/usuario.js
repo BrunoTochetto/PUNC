@@ -2,8 +2,11 @@ import { querry } from '../models/querry.js';
 import { logErro, logAviso, logInfo } from '../models/logErrors.js';
 import { MACAddress, Coordenadas } from '../services/dados.js';
 
+/*
+* [Recebe]: nome_dispositivo, mac, latitude, longitude
+* [Retorna]: celula x e y para cadastro no FCM
+*/
 async function cadastro(req, res) {
-	
 	try {
 		const { nome_dispositivo, mac, latitude, longitude } = req.body;
 
@@ -61,7 +64,6 @@ async function cadastro(req, res) {
 		if (result.rows.length === 0) {
 			const erro = new Error('Falha ao inserir usuário');
 			await logAviso(`Registro do usuário: ${erro.message}`, erro);
-			throw erro;
 		}
 
 		const usuario = result.rows[0];

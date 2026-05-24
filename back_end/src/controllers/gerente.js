@@ -3,31 +3,36 @@ import { logErro, logAviso, logInfo } from '../models/logErrors.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
+/*
+* [Recebe]: email e senha
+* [Retorna]: id_gerente e token jwt
+*/
 async function login(req, res){
   try {
-    const { nome_usuario, senha } = req.body;
+    const { email, senha } = req.body;
     // Criar uma coisa que: armazena o JWT token no banco, e quando tenta logar pega essa chave. Se já estiver expirando cria outra.
-    if (!nome_usuario || !senha) {
-      await logAviso(`Validação falhou: nome_usuario ou senha não fornecidos`);
+    if (!email || !senha) {
+      await logAviso(`Validação falhou: email ou senha não fornecidos`);
       return res.status(400).json({ 
-        erro: "Nome de usuário e senha são obrigatórios" 
+        erro: "Email e senha são obrigatórios" 
       });
     }
     
     const resultado = await querry(
-      'SELECT id, nome_usuario, senha_criptografada FROM gerentes WHERE nome_usuario = $1',
-      [nome_usuario]
+      'SELECT id, nome_usuario, email, senha_criptografada FROM gerentes WHERE email = $1',
+      [email.toLowerCase()]
     );
 
     // Verificar se gerente existe
     if (resultado.rows.length === 0) {
-      await logAviso(`Tentativa de login falhou: usuário "${nome_usuario}" não encontrado`);
+      await logAviso(`Tentativa de login falhou: usuário "${email}" não encontrado`);
       return res.status(401).json({ 
         erro: "Usuário não encontrado ou Credenciais inválidas" 
       });
     }
 
     const gerente = resultado.rows[0];
+    const nome_usuario = gerente.nome_usuario;
 
     const senhaValida = await bcrypt.compare(senha, gerente.senha_criptografada);
     
@@ -38,20 +43,20 @@ async function login(req, res){
       });
     }
 
-
     const token = jwt.sign(
       { id: gerente.id, nome_usuario: gerente.nome_usuario },
       process.env.JWT_SECRET || 'seu_segredo_super_secreto',
       { expiresIn: '1Y' }
     );
 
-    res.json({ 
+    res.status(202).json({ 
       mensagem: "Login realizado com sucesso",
       id: gerente.id,
-      token: token,
+      nome: gerente.nome_usuario,
+      token: token
     });
   } catch (erro) {
-    await logErro('Erro ao fazer login', erro);
+    logErro('Erro ao fazer login', erro);
     res.status(500).json({ 
       erro: "Erro ao realizar login" 
     });
@@ -76,21 +81,106 @@ async function registrarGerente(nome, senha, email) {
     return { sucesso: true, gerente };
   } catch (erro) {
     await logErro(`Erro ao registrar gerente ${nome}`, erro);
-    throw erro;
   }
 }
 
+// registrarGerente('Bruno', '123', 'drag@isada.com');
 
+// Motoristas
+/*
+* [Recebe]: id_gerente, FILTRO (cep)
+* [Retorna]: todos os dados dos motoristas.
+*/
 async function listarMotoristas(req, res){
   res.json({ mensagem: "Lista de motoristas" });
 };
 
+/*
+* [Recebe]: nome_dispositivo, mac, id_gerente
+* [Retorna]: id (próprio), id_gerente
+* Seria bom ter uma autenticação específica para o caminhoneiro, usando o JWT
+*/
 async function criarMotorista(req, res){
   res.json({ mensagem: "Motorista criado" });
 };
-
+/*
+* [Recebe]: id_motorista, id_gerente (segurança)
+* [Retorna]: Mensagem de confirmação
+*/
 async function deletarMotorista(req, res){
   res.json({ mensagem: "Motorista deletado" });
 };
 
-export {deletarMotorista, criarMotorista, listarMotoristas, login}
+// Areas de atuação
+/*
+* [Recebe]: id_gerente, FILTRO (cep) <- Front-end deve enviar sempre! Mesmo que esteja vazio
+* [Retorna]: todos os dados da área de atuação.
+*/
+async function listarAreasAtuacao(req, res){
+   try {
+    const { id_gerente, cep } = req.body;
+
+    const areas = `
+      SELECT * FROM area_de_atuacao
+      WHERE id_gerente = ${id_gerente}
+      AND cep LIKE '${cep || "%"}'`;
+
+    const resultado = await querry(areas);
+    const rows = resultado.rows;
+    console.log(rows);
+
+
+    res.status(201).json({ rows });
+
+  } catch (e) {
+    logErro("Criar area de atuação:", e);
+    res.status(400);
+  }
+};
+
+
+/*
+* [Recebe]: id_gerente, cep
+* [Retorna]: Mensagem de confirmação
+*/
+async function criarAreaAtuacao(req, res){
+  try {
+    const { id_gerente, cep } = req.body;
+
+    try {
+      const verificarDuplicata = `
+        SELECT * FROM area_de_atuacao
+        WHERE id_gerente = ${id_gerente}
+        AND cep = '${cep}'`;
+
+      const resultado = await querry(verificarDuplicata);
+
+      if (resultado.rows.length != 0) {
+        logAviso("CEP já existe", null);
+        return res.status(409).json({message: "CEP já existe."});
+      }
+    } catch (e) {
+      logErro("verificar duplicata area atuação: ", e);
+    }
+   
+    const criacao = `
+    INSERT INTO area_de_atuacao (id_gerente, cep)
+    VALUES ( $1, $2 )
+    `
+    await querry(criacao, [id_gerente, cep]);
+
+    res.status(201).json({ mensagem: "Area de atuação criado" });
+  } catch (e) {
+    logErro("Criar area de atuação:", e);
+    res.status(400);
+  }
+};
+/*
+* [Recebe]: id (próprio), id_gerente (segurança)
+* [Retorna]: Mensagem de confirmação
+*/
+async function deletarAreaAtuacao(req, res){
+  res.json({ mensagem: "area de atuação deletado" });
+};
+
+export {deletarMotorista, criarMotorista, listarMotoristas, login, listarAreasAtuacao, criarAreaAtuacao, deletarAreaAtuacao}

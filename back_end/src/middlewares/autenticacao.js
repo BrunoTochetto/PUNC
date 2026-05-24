@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { logAviso } from '../models/logErrors.js';
 
-async function autenticar(req, res, next) {
+async function autenticacaoNecessaria(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
     
@@ -47,4 +47,4 @@ async function autenticar(req, res, next) {
   }
 }
 
-export { autenticar };
+export { autenticacaoNecessaria };

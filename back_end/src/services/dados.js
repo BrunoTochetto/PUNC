@@ -78,13 +78,26 @@ class Coordenadas {
 
 class CEP {
 	constructor(cep) {
-		const cepFormatado = this.isValido(cep);
+		const cepFormatado = CEP.isValido(cep);
 
-		this.cep = cepFormatado;
+		this.cep = cepFormatado ? cepFormatado : null;
+		return cepFormatado;
 	}
 
 	static isValido(cep) {
-		const cepFormatado = cep.replace('-', '').trim();
+		let cepSeparado = cep.replaceAll(' ', '').split('-');
+
+		if (cepSeparado.length == 2) {
+			if (cepSeparado[0].length < 5) {
+				const erro = new Error(
+					`Formato de CEP inválido: ${cep}. Use o formato 12345-123.`
+				);
+				logAviso(`CEP: ${erro.message}`, erro);
+				return false
+			}
+			cepSeparado[0] += cepSeparado[1];
+		}
+		const cepFormatado = cepSeparado[0];
 
 		if (cepFormatado.length > 8) {
 			const erro = new Error(
@@ -93,7 +106,7 @@ class CEP {
 			logAviso(`CEP: ${erro.message}`, erro);
 			return false
 		};
-
+		return cepFormatado;
 	}
 
 	get value() {
@@ -101,4 +114,5 @@ class CEP {
 	}
 }
 
-export { MACAddress, Coordenadas };
+
+export { MACAddress, Coordenadas, CEP };

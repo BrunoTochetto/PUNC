@@ -19,3 +19,12 @@ Transformar coordenadas em CEP
 Para um melhor gerenciamento de erros e depurração, foi adicionado um sistema de Log que (supostamente) cria arquivos de log, gerando um histórico geral.
 
 Os logs são gerados pela biblioteca winston. É criado um log diário com todos os logs (info, aviso e erros) e um só para erros. A pasta logs fica no diretório principal e foi colocada no .gitignore
+
+
+### Mudanças menores
+
++ Adicionado coluna "tipo_lixo" em tabela "trajetorias"
++ Adicionado coluna "dia_da_semana" em tabela "horarios_coleta"
++ Adicionado coluna "id_gerente" em tabela "horarios_coleta"
++ Adicionado coluna "area_de_atuacao" em tabela "horarios_coleta"
++ Adicionado coluna "comentarios" em tabela "horarios_coleta"
