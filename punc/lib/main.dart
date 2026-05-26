@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import './nucleo/temas/appTheme.dart';
+import './source/views/cronograma.dart';
+
 
 void main() {
   runApp(
     MaterialApp(
       theme: PUNCAppTheme.theme,
       darkTheme: PUNCAppTheme.darkTheme,
-      home: Configuracoes(),
+      home: CronogramaPage(),
       
     )
   );
@@ -19,7 +21,8 @@ SE for a primeira vez que a pessoa abre o aplicativo:
     Aparece uma aba de configurações explicando o que é o aplicativo;
     Pergunta se o usuário está em SUA CASA:
       Se SIM:
-        Pede a permissão para acessar a localização agora e registrar ele na sua localização atual.
+        Pede a permissão para acessar a localização agora e registrar 
+        ele na sua localização atual.
 
       Se NÃO:
         Mostra uma mensagem "Apenas pediremos a sua localização quando você estiver em casa... Lembraremos você daqui meia hora!";
