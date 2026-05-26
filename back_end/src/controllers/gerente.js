@@ -1,4 +1,5 @@
 import { querry } from '../models/querry.js';
+import { CEP, Coordenadas, MACAddress } from '../services/dados.js';
 import { logErro, logAviso, logInfo } from '../models/logErrors.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -88,11 +89,33 @@ async function registrarGerente(nome, senha, email) {
 
 // Motoristas
 /*
-* [Recebe]: id_gerente, FILTRO (cep)
+* [Recebe]: id_gerente
 * [Retorna]: todos os dados dos motoristas.
 */
+// ! Não testado
 async function listarMotoristas(req, res){
-  res.json({ mensagem: "Lista de motoristas" });
+  try {
+    const { id_gerente } = req.body;
+
+    const pegarMotoristas = `
+    SELECT * FROM vw_motoristas_de_gerentes
+    WHERE id_gerente = $1
+    `
+
+    const resultado = await querry(pegarMotoristas, [id_gerente]);
+
+    if (resultado.rows.length == 0) {
+      res.status(204).json({message: "Nenhum motorista registrado encontrado..."})
+      throw new Error("Nenhum motorista para este gerente encontrado.")
+    };
+
+    res.status(200).json({
+      ...resultado.rows
+    });
+
+  } catch (e) {
+    logErro("Erro na função listarMotoristas em gerente: ", e)
+  }
 };
 
 /*
@@ -107,8 +130,30 @@ async function criarMotorista(req, res){
 * [Recebe]: id_motorista, id_gerente (segurança)
 * [Retorna]: Mensagem de confirmação
 */
+// ! Não testado
 async function deletarMotorista(req, res){
-  res.json({ mensagem: "Motorista deletado" });
+  try {
+    const { id_motorista, id_gerente } = req.body;
+
+    const deletarMotoristas = `
+    DELETE FROM motoristas
+    WHERE id = $1
+    AND id_gerente = $2
+    `
+
+    await querry(deletarMotoristas, [id_motorista, id_gerente]);
+
+    res.status(200).json({
+      message: "Deletado com sucesso"
+    });
+
+  } catch (e) {
+    res.status(400).res({
+      message: "Não foi possível deletar o motorista.",
+      error: e
+    });
+    logErro("Erro na função listarMotoristas em gerente: ", e)
+  }
 };
 
 // Areas de atuação
@@ -116,6 +161,7 @@ async function deletarMotorista(req, res){
 * [Recebe]: id_gerente, FILTRO (cep) <- Front-end deve enviar sempre! Mesmo que esteja vazio
 * [Retorna]: todos os dados da área de atuação.
 */
+// ! Não testado
 async function listarAreasAtuacao(req, res){
    try {
     const { id_gerente, cep } = req.body;
@@ -143,6 +189,7 @@ async function listarAreasAtuacao(req, res){
 * [Recebe]: id_gerente, cep
 * [Retorna]: Mensagem de confirmação
 */
+// ! Não testado
 async function criarAreaAtuacao(req, res){
   try {
     const { id_gerente, cep } = req.body;
@@ -179,8 +226,30 @@ async function criarAreaAtuacao(req, res){
 * [Recebe]: id (próprio), id_gerente (segurança)
 * [Retorna]: Mensagem de confirmação
 */
+// ! Não testado
 async function deletarAreaAtuacao(req, res){
-  res.json({ mensagem: "area de atuação deletado" });
+  try {
+    const { id_area_atuacao, id_gerente } = req.body;
+
+    const deletarMotoristas = `
+    DELETE FROM area_de_atuacao
+    WHERE id = $1
+    AND id_gerente = $2
+    `
+
+    await querry(deletarMotoristas, [ id_area_atuacao, id_gerente]);
+
+    res.status(200).json({
+      message: "Deletado com sucesso"
+    });
+
+  } catch (e) {
+    res.status(400).res({
+      message: "Não foi possível deletar o motorista.",
+      error: e
+    });
+    logErro("Erro na função listarMotoristas em gerente: ", e)
+  }
 };
 
 export {deletarMotorista, criarMotorista, listarMotoristas, login, listarAreasAtuacao, criarAreaAtuacao, deletarAreaAtuacao}
