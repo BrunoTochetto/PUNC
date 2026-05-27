@@ -52,9 +52,9 @@ const logger = winston.createLogger({
 
 // Se em desenvolvimento, também logar no console
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
+  // logger.add(new winston.transports.Console({
+  //   format: winston.format.simple(),
+  // }));
 }
 
 // Auxiliares
@@ -74,6 +74,7 @@ function logErro(message, error = null, level = 'error') {
     try {
       const logData = error ? { error } : {};
       logger.log(level, message, logData);
+      console.debug(error.message);
     } catch (fileError) {
       console.error('Erro ao escrever no arquivo de log:', fileError.message);
     }

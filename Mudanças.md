@@ -23,8 +23,10 @@ Os logs são gerados pela biblioteca winston. É criado um log diário com todos
 
 ### Mudanças menores
 
-+ Adicionado coluna "tipo_lixo" em tabela "trajetorias"
-+ Adicionado coluna "dia_da_semana" em tabela "horarios_coleta"
-+ Adicionado coluna "id_gerente" em tabela "horarios_coleta"
-+ Adicionado coluna "area_de_atuacao" em tabela "horarios_coleta"
-+ Adicionado coluna "comentarios" em tabela "horarios_coleta"
++ Adicionado coluna "tipo_lixo" na tabela "trajetorias"
++ Adicionado coluna "dia_da_semana" na tabela "horarios_coleta"
++ Adicionado coluna "id_gerente" na tabela "horarios_coleta"
++ Adicionado coluna "area_de_atuacao" na tabela "horarios_coleta"
++ Adicionado coluna "comentarios" na tabela "horarios_coleta"
++ Adicionado coluna "ativo" na tabela "horarios_coleta"
++ Adicionado endpoint "listarPorGerente" para a tabela de "horarios de coleta"

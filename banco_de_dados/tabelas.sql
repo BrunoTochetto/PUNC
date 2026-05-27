@@ -110,11 +110,12 @@ CREATE TABLE horarios_coleta (
     id SERIAL PRIMARY KEY,
     id_gerente INT,
     id_area_atuacao INT,
-    horario_estimado TIMESTAMPTZ NOT NULL,
+    horario_estimado VARCHAR(255) NOT NULL,
     dia_semana VARCHAR(127),
     data_criacao TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     tipo_lixo VARCHAR(11),
     comentarios VARCHAR(255),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT fk_gerente
     FOREIGN KEY (id_gerente) 
