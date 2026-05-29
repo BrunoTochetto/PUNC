@@ -27,3 +27,5 @@ async function acharTodosEmRaio(latitude, longitude, raioM) {
 }
 
 export {ativos, status, acharTodosEmRaio}
+
+// linha teste carol oi
