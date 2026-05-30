@@ -120,7 +120,6 @@ async function criar(req, res){
 * [Recebe]: id horarios de coleta, horario_estimado, dia_semana, data_criacao, tipo_lixo, comentários
 * [Retorna]: Mensagem de confirmação de criação.
 */
-// ! Não testado
 async function editar(req, res){
   try {
     const { id_gerente, id_horario, id_area_atuacao, horario_estimado, dia_semana, tipo_lixo, comentarios, ativo } = req.body;
@@ -208,7 +207,7 @@ async function editar(req, res){
 // ! Não testado
 async function listarPorGerente(req, res) {
   try {
-    const { id_gerente } = req.params;
+    const { id_gerente } = req.body;
 
     if (!id_gerente || Number.isNaN(id_gerente)) {
       await logAviso('Listar horários por gerente: ID do gerente inválido', null);
