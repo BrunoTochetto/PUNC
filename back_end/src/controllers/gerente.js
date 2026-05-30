@@ -1,6 +1,8 @@
-import { querry } from '../models/querry.js';
-import { CEP, Coordenadas, MACAddress } from '../services/dados.js';
-import { logErro, logAviso, logInfo } from '../models/logErrors.js';
+import { querry } from '../services/querry.js';
+import {Coordenadas} from '../models/coordenadas.js';
+import {MACAddress} from'../models/macAddress.js';
+import {CEP} from'../models/cep.js';
+import { logErro, logAviso, logInfo } from '../services/logErrors.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 

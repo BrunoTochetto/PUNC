@@ -30,3 +30,5 @@ Os logs são gerados pela biblioteca winston. É criado um log diário com todos
 + Adicionado coluna "comentarios" na tabela "horarios_coleta"
 + Adicionado coluna "ativo" na tabela "horarios_coleta"
 + Adicionado endpoint "listarPorGerente" para a tabela de "horarios de coleta"
+
+- Mudado a biblioteca "websocket" por "ws" por descontinuidade da biblioteca 'websocket'. (Mas fazem as mesmas coisas).

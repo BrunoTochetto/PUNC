@@ -1,4 +1,8 @@
-import { logErro } from "../models/logErrors.js";
+import {Coordenadas} from '../models/coordenadas.js';
+import {MACAddress} from'../models/macAddress.js';
+import {CEP} from'../models/cep.js';
+import { logErro, logAviso, logInfo } from '../services/logErrors.js';
+import { querry } from '../services/querry.js';
 
 /*
 * [Recebe]: CEP

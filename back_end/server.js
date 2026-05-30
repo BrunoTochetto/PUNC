@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
-import { logInfo } from './src/models/logErrors.js';
+import { logInfo } from './src/services/logErrors.js';
 
 import usuarioRoutes from './src/routes/usuario.js';
 import gerenteRoutes from './src/routes/gerente.js';
@@ -12,6 +12,8 @@ import mapaRoutes from './src/routes/mapa.js';
 import horarioColetaRoutes from './src/routes/horarioColeta.js';
 
 const app = express();
+
+import './src/services/websocket.js';
 
 app.use(helmet());
 app.use(cors());

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { logAviso } from '../models/logErrors.js';
+import { logErro, logAviso, logInfo } from '../services/logErrors.js';
 
 async function autenticacaoNecessaria(req, res, next) {
   try {

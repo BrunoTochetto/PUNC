@@ -16,7 +16,7 @@ async function querry(query, args = []) {
     const resultado = await pool.query(query, args);
     return resultado;
   } catch (erro) {
-    await logErro('Erro ao executar query no banco de dados', erro);
+    await logErro('Erro ao executar query no banco de dados, ' + `\nQuerry: ${query}, Args: ${args}`, erro);
     throw erro;
   }
 }
