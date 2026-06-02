@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CardColeta extends StatelessWidget {
+class CardCrono extends StatelessWidget {
   final String day;
   final String time;
   final String type;
   final Color iconColor;
 
-  const CardColeta({
+  const CardCrono({
     super.key,
     required this.day,
     required this.time,

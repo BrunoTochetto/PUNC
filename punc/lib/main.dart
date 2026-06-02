@@ -3,6 +3,9 @@ import './nucleo/temas/appTheme.dart';
 import './source/views/cronograma.dart';
 import './source/views/gerenciamento.dart';
 import './source/views/perfil.dart';
+import './source/views/configuracao_usuario_page.dart';
+import './source/views/gerenciamento2.dart';
+import './source/views/mapa_grupos_page.dart';
 
 
 void main() {
@@ -10,7 +13,7 @@ void main() {
     MaterialApp(
       theme: PUNCAppTheme.theme,
       darkTheme: PUNCAppTheme.darkTheme,
-      home: PerfilPage(),
+      home: CronogramaPage(),
       
     )
   );

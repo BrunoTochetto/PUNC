@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CardInfoPerfil extends StatelessWidget {
+class CardPerfil extends StatelessWidget {
   final IconData icon;
   final String title;
   final List<Map<String, String>> details;
 
-  const CardInfoPerfil({
+  const CardPerfil({
     super.key,
     required this.icon,
     required this.title,

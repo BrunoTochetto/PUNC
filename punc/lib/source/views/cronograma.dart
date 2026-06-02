@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/source/widgets/card_coleta.dart';
+import '/source/widgets/card_crono.dart';
 
 class CronogramaPage extends StatelessWidget {
   const CronogramaPage({super.key});
@@ -50,25 +50,25 @@ class CronogramaPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const CardColeta(
+                  const CardCrono(
                     day: 'Segunda-feira',
                     time: '12:30',
                     type: 'Reciclável',
                     iconColor: Colors.green,
                   ),
-                  const CardColeta(
+                  const CardCrono(
                     day: 'Terça-feira',
                     time: '08:45',
                     type: 'Orgânico',
                     iconColor: Colors.brown,
                   ),
-                  const CardColeta(
+                  const CardCrono(
                     day: 'Segunda-feira',
                     time: '12:30',
                     type: 'Reciclável',
                     iconColor: Colors.green,
                   ),
-                  const CardColeta(
+                  const CardCrono(
                     day: 'Segunda-feira',
                     time: '12:30',
                     type: 'Reciclável',

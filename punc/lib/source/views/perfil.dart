@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/card_info_perfil.dart';
+import '../widgets/card_perfil.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -60,7 +60,7 @@ class PerfilPage extends StatelessWidget {
                   const SizedBox(height: 40),
 
                   // Card Informações Pessoais
-                  const CardInfoPerfil(
+                  const CardPerfil(
                     icon: Icons.person_outline,
                     title: 'Informações pessoais',
                     details: [
@@ -72,7 +72,7 @@ class PerfilPage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Card Preferências
-                  const CardInfoPerfil(
+                  const CardPerfil(
                     icon: Icons.edit_note,
                     title: 'Preferências',
                     details: [
