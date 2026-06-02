@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import './nucleo/temas/appTheme.dart';
 import './source/views/cronograma.dart';
+import './source/views/gerenciamento.dart';
+import './source/views/perfil.dart';
 
 
 void main() {
@@ -8,7 +10,7 @@ void main() {
     MaterialApp(
       theme: PUNCAppTheme.theme,
       darkTheme: PUNCAppTheme.darkTheme,
-      home: CronogramaPage(),
+      home: PerfilPage(),
       
     )
   );

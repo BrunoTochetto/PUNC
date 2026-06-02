@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '/nucleo/temas/appCores.dart';
-import '/source/widgets/card_veiculo.dart';
+import '../widgets/card_veiculo.dart';
 
 class GerenciamentoPage extends StatefulWidget {
   const GerenciamentoPage({super.key});
@@ -20,31 +19,28 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: PUNCCores.claroSuperficie,
       appBar: AppBar(
-        backgroundColor: PUNCCores.claroAppBar,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+        leading: const Padding(
+          padding: EdgeInsets.all(8.0),
           child: CircleAvatar(
             backgroundColor: Colors.white24,
-            child: Icon(Icons.eco, color: PUNCCores.claroOnAppBar, size: 20),
+            child: Icon(Icons.eco, color: Colors.white, size: 20),
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none, color: PUNCCores.claroOnAppBar),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: PUNCCores.claroOnAppBar),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {},
           ),
-          IconButton(
-            icon: Icon(Icons.menu, color: PUNCCores.claroOnAppBar),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
         ],
       ),
       body: Column(
@@ -57,18 +53,18 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                 children: [
                   Text(
                     'Gerenciamento',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Motoristas e Caminhões',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -79,7 +75,9 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                       icon: const Icon(Icons.add, size: 20),
                       label: const Text('Adicionar motorista/caminhão'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50),
+                        backgroundColor: const Color(
+                          0xFF4CAF50,
+                        ), // Cor semântica mantida
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -92,14 +90,10 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Pesquisar agrupador',
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      hintStyle: theme.inputDecorationTheme.hintStyle,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: colorScheme.onSurface.withOpacity(0.4),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -130,23 +124,13 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                       onPressed: () {},
                       icon: const Icon(Icons.list, size: 20),
                       label: const Text('Ver todos os veículos'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PUNCCores.claroAppBar,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          Container(
-            height: 60,
-            color: PUNCCores.claroAppBar,
-          ),
+          Container(height: 60, color: theme.appBarTheme.backgroundColor),
         ],
       ),
     );

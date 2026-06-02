@@ -14,11 +14,14 @@ class CardInfoPerfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -30,7 +33,7 @@ class CardInfoPerfil extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -47,8 +50,8 @@ class CardInfoPerfil extends StatelessWidget {
                       width: 100,
                       child: Text(
                         detail.keys.first,
-                        style: TextStyle(
-                          color: Colors.grey[600],
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -56,7 +59,7 @@ class CardInfoPerfil extends StatelessWidget {
                     Expanded(
                       child: Text(
                         detail.values.first,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),

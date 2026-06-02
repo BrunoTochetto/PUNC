@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
-import '/nucleo/temas/appCores.dart';
-import '/source/widgets/card_info_perfil.dart';
+import '../widgets/card_info_perfil.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: PUNCCores.claroSuperficie,
       appBar: AppBar(
-        backgroundColor: PUNCCores.claroAppBar,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+        leading: const Padding(
+          padding: EdgeInsets.all(8.0),
           child: CircleAvatar(
             backgroundColor: Colors.white24,
-            child: Icon(Icons.eco, color: PUNCCores.claroOnAppBar, size: 20),
+            child: Icon(Icons.eco, color: Colors.white, size: 20),
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none, color: PUNCCores.claroOnAppBar),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: PUNCCores.claroOnAppBar),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.menu, color: PUNCCores.claroOnAppBar),
+            icon: const Icon(Icons.menu),
             onPressed: () {},
           ),
         ],
@@ -48,8 +47,13 @@ class PerfilPage extends StatelessWidget {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: colorScheme.onSurface.withOpacity(0.1),
                         shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 60,
+                        color: colorScheme.onSurface.withOpacity(0.3),
                       ),
                     ),
                   ),
@@ -87,13 +91,6 @@ class PerfilPage extends StatelessWidget {
                       height: 40,
                       child: ElevatedButton(
                         onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: PUNCCores.claroAppBar,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
                         child: const Text(
                           'Editar perfil',
                           style: TextStyle(fontSize: 14),
@@ -108,7 +105,7 @@ class PerfilPage extends StatelessWidget {
           // Rodapé
           Container(
             height: 60,
-            color: PUNCCores.claroAppBar,
+            color: theme.appBarTheme.backgroundColor,
           ),
         ],
       ),

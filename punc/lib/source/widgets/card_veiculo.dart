@@ -26,11 +26,14 @@ class CardVeiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -43,12 +46,12 @@ class CardVeiculo extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: colorScheme.onSurface.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.local_shipping,
-                  color: Colors.grey[400],
+                  color: colorScheme.onSurface.withOpacity(0.3),
                   size: 40,
                 ),
               ),
@@ -59,7 +62,7 @@ class CardVeiculo extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -67,16 +70,16 @@ class CardVeiculo extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       driver,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       plate,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 13,
                       ),
                     ),
@@ -129,7 +132,7 @@ class CardVeiculo extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Divider(
-            color: Colors.grey[200],
+            color: theme.dividerColor.withOpacity(0.1),
             height: 1,
           ),
           const SizedBox(height: 12),
@@ -137,19 +140,22 @@ class CardVeiculo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildActionButton(
+                context,
                 icon: Icons.visibility_outlined,
                 label: 'Ver detalhes',
                 onPressed: onDetails ?? () {},
               ),
               _buildActionButton(
+                context,
                 icon: Icons.edit_outlined,
                 label: 'Editar',
                 onPressed: onEdit ?? () {},
               ),
               _buildActionButton(
+                context,
                 icon: Icons.delete_outline,
                 label: 'Excluir',
-                textColor: Colors.red,
+                textColor: colorScheme.error,
                 onPressed: onDelete ?? () {},
               ),
             ],
@@ -159,19 +165,23 @@ class CardVeiculo extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
+  Widget _buildActionButton(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
-    Color textColor = Colors.grey,
+    Color? textColor,
   }) {
+    final theme = Theme.of(context);
+    final color = textColor ?? theme.colorScheme.onSurface.withOpacity(0.6);
+
     return TextButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: textColor),
+      icon: Icon(icon, size: 18, color: color),
       label: Text(
         label,
         style: TextStyle(
-          color: textColor,
+          color: color,
           fontSize: 12,
         ),
       ),
