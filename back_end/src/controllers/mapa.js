@@ -1,22 +1,38 @@
-import {Coordenadas} from '../models/coordenadas.js';
-import {MACAddress} from'../models/macAddress.js';
-import {CEP} from'../models/cep.js';
-import { logErro, logAviso, logInfo } from '../services/logErrors.js';
+import { logErro } from '../services/logErrors.js';
 import { querry } from '../services/querry.js';
 
 /*
-* [Recebe]: CEP
-* [Retorna]: celula x e y para cadastro no FCM
+* [Recebe]: opcional id_gerente
+* [Retorna]: motoristas em percurso com a última localização disponível.
 */
 async function emPercurso(req, res) {
   try {
-    const {cep} = req.body;
+    const id_gerente = req.query.id_gerente ? Number(req.query.id_gerente) : undefined;
 
-    res.status(400);
-    return;
+    let sql = `
+      SELECT *
+      FROM vw_localizacoes_de_trajetos
+      WHERE id_trajetoria IN (
+        SELECT id FROM trajetorias WHERE tempo_fim IS NULL
+      )
+    `;
+    const values = [];
 
-  } catch (e) {
-    logErro("emPercurso", erro);
+    if (id_gerente !== undefined) {
+      if (Number.isNaN(id_gerente)) {
+        return res.status(400).json({ erro: 'ID do gerente inválido.' });
+      }
+      sql += ` AND id_gerente = $1`;
+      values.push(id_gerente);
+    }
+
+    sql += '\n      ORDER BY tempo_comeco DESC';
+
+    const resultado = await querry(sql, values);
+    return res.status(200).json({ trajetosEmPercurso: resultado.rows });
+  } catch (erro) {
+    logErro('Erro ao buscar percurso em mapa', erro);
+    res.status(500).json({ erro: 'Erro ao buscar trajetos em percurso.' });
   }
 };
 

@@ -1,7 +1,5 @@
 import { querry } from '../services/querry.js';
-import {Coordenadas} from '../models/coordenadas.js';
-import {MACAddress} from'../models/macAddress.js';
-import {CEP} from'../models/cep.js';
+import { CEP } from '../models/cep.js';
 import { logErro, logAviso, logInfo } from '../services/logErrors.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -13,20 +11,18 @@ import bcrypt from 'bcrypt';
 async function login(req, res){
   try {
     const { email, senha } = req.body;
-    // Criar uma coisa que: armazena o JWT token no banco, e quando tenta logar pega essa chave. Se já estiver expirando cria outra.
     if (!email || !senha) {
       await logAviso(`Validação falhou: email ou senha não fornecidos`);
       return res.status(400).json({ 
         erro: "Email e senha são obrigatórios" 
       });
     }
-    
+
     const resultado = await querry(
       'SELECT id, nome_usuario, email, senha_criptografada FROM gerentes WHERE email = $1',
       [email.toLowerCase()]
     );
 
-    // Verificar se gerente existe
     if (resultado.rows.length === 0) {
       await logAviso(`Tentativa de login falhou: usuário "${email}" não encontrado`);
       return res.status(401).json({ 
@@ -35,14 +31,12 @@ async function login(req, res){
     }
 
     const gerente = resultado.rows[0];
-    const nome_usuario = gerente.nome_usuario;
-
     const senhaValida = await bcrypt.compare(senha, gerente.senha_criptografada);
-    
+
     if (!senhaValida) {
-      await logAviso(`Tentativa de login falhou: senha incorreta para usuário "${nome_usuario}" (ID: ${gerente.id})`);
+      await logAviso(`Tentativa de login falhou: senha incorreta para usuário "${gerente.nome_usuario}" (ID: ${gerente.id})`);
       return res.status(401).json({ 
-        erro: "Credenciais inválidas" ,
+        erro: "Credenciais inválidas" 
       });
     }
 
@@ -56,13 +50,11 @@ async function login(req, res){
       mensagem: "Login realizado com sucesso",
       id: gerente.id,
       nome: gerente.nome_usuario,
-      token: token
+      token
     });
   } catch (erro) {
     logErro('Erro ao fazer login', erro);
-    res.status(500).json({ 
-      erro: "Erro ao realizar login" 
-    });
+    res.status(500).json({ erro: "Erro ao realizar login" });
   }
 };
 
@@ -72,7 +64,6 @@ async function registrarGerente(nome, senha, email) {
     await logInfo(`Registrando novo gerente: ${nome}`);
 
     const senhaCriptografada = await bcrypt.hash(senha, 10);
-    
     const resultado = await querry(
       'INSERT INTO gerentes (nome_usuario, senha_criptografada, email) VALUES ($1, $2, $3) RETURNING id, nome_usuario, email',
       [nome, senhaCriptografada, email]
@@ -94,67 +85,108 @@ async function registrarGerente(nome, senha, email) {
 * [Recebe]: id_gerente
 * [Retorna]: todos os dados dos motoristas.
 */
-// ! Não testado
 async function listarMotoristas(req, res){
   try {
-    const { id_gerente } = req.body;
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
 
     const pegarMotoristas = `
-    SELECT * FROM vw_motoristas_de_gerentes
-    WHERE id_gerente = $1
-    `
+      SELECT * FROM vw_motoristas_de_gerentes
+      WHERE id_gerente = $1
+      ORDER BY id_motorista
+    `;
 
-    const resultado = await querry(pegarMotoristas, [id_gerente]);
-
-    if (resultado.rows.length == 0) {
-      res.status(204).json({message: "Nenhum motorista registrado encontrado..."})
-      throw new Error("Nenhum motorista para este gerente encontrado.")
-    };
-
-    res.status(200).json({
-      ...resultado.rows
-    });
-
+    const resultado = await querry(pegarMotoristas, [Number(id_gerente)]);
+    return res.status(200).json({ motoristas: resultado.rows });
   } catch (e) {
-    logErro("Erro na função listarMotoristas em gerente: ", e)
+    logErro("Erro na função listarMotoristas em gerente", e);
+    res.status(500).json({ erro: 'Erro ao listar motoristas.' });
   }
 };
 
 /*
 * [Recebe]: nome_dispositivo, mac, id_gerente
 * [Retorna]: id (próprio), id_gerente
-* Seria bom ter uma autenticação específica para o caminhoneiro, usando o JWT
 */
 async function criarMotorista(req, res){
-  res.json({ mensagem: "Motorista criado" });
+  try {
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const { nome_dispositivo, mac, identificacao_caminhao, tipo_lixo } = req.body;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+
+    if (!nome_dispositivo || !mac) {
+      return res.status(400).json({ erro: 'Nome do dispositivo e MAC são obrigatórios.' });
+    }
+
+    const duplicado = await querry(
+      'SELECT id FROM motoristas WHERE mac = $1 AND id_gerente = $2',
+      [mac, Number(id_gerente)]
+    );
+
+    if (duplicado.rows.length > 0) {
+      return res.status(409).json({ erro: 'Motorista com este MAC já cadastrado.' });
+    }
+
+    const inserirMotorista = `
+      INSERT INTO motoristas (nome_dispositivo, mac, identificacao_caminhao, tipo_lixo, id_gerente)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, nome_dispositivo, mac, identificacao_caminhao, tipo_lixo, id_gerente, data_criacao
+    `;
+
+    const resultado = await querry(inserirMotorista, [
+      nome_dispositivo,
+      mac,
+      identificacao_caminhao || null,
+      tipo_lixo || null,
+      Number(id_gerente)
+    ]);
+
+    res.status(201).json({ mensagem: 'Motorista criado com sucesso.', motorista: resultado.rows[0] });
+  } catch (e) {
+    logErro('Erro ao criar motorista', e);
+    res.status(500).json({ erro: 'Erro ao criar motorista.' });
+  }
 };
+
 /*
 * [Recebe]: id_motorista, id_gerente (segurança)
 * [Retorna]: Mensagem de confirmação
 */
-// ! Não testado
 async function deletarMotorista(req, res){
   try {
-    const { id_motorista, id_gerente } = req.body;
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const id_motorista = req.body.id_motorista;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+    if (!id_motorista || Number.isNaN(Number(id_motorista))) {
+      return res.status(400).json({ erro: 'ID do motorista inválido.' });
+    }
 
     const deletarMotoristas = `
-    DELETE FROM motoristas
-    WHERE id = $1
-    AND id_gerente = $2
-    `
+      DELETE FROM motoristas
+      WHERE id = $1
+      AND id_gerente = $2
+      RETURNING id
+    `;
 
-    await querry(deletarMotoristas, [id_motorista, id_gerente]);
+    const resultado = await querry(deletarMotoristas, [Number(id_motorista), Number(id_gerente)]);
 
-    res.status(200).json({
-      message: "Deletado com sucesso"
-    });
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Motorista não encontrado ou não autorizado.' });
+    }
 
+    res.status(200).json({ message: 'Motorista deletado com sucesso.' });
   } catch (e) {
-    res.status(400).res({
-      message: "Não foi possível deletar o motorista.",
-      error: e
-    });
-    logErro("Erro na função listarMotoristas em gerente: ", e)
+    logErro('Erro ao deletar motorista', e);
+    res.status(500).json({ erro: 'Não foi possível deletar o motorista.' });
   }
 };
 
@@ -163,95 +195,119 @@ async function deletarMotorista(req, res){
 * [Recebe]: id_gerente, FILTRO (cep) <- Front-end deve enviar sempre! Mesmo que esteja vazio
 * [Retorna]: todos os dados da área de atuação.
 */
-// ! Não testado
 async function listarAreasAtuacao(req, res){
-   try {
-    const { id_gerente, cep } = req.body;
+  try {
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const cep = req.body.cep || '';
 
-    const areas = `
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+
+    let cepFormatado = '%';
+    if (cep) {
+      const validCep = new CEP(cep);
+      if (!validCep) {
+        return res.status(400).json({ erro: 'CEP inválido.' });
+      }
+      cepFormatado = `${validCep}%`;
+    }
+
+    const query = `
       SELECT * FROM area_de_atuacao
-      WHERE id_gerente = ${id_gerente}
-      AND cep LIKE '${cep || "%"}'`;
+      WHERE id_gerente = $1
+      AND cep LIKE $2
+      ORDER BY cep
+    `;
 
-    const resultado = await querry(areas);
-    const rows = resultado.rows;
-    console.log(rows);
-
-
-    res.status(201).json({ rows });
-
+    const resultado = await querry(query, [Number(id_gerente), cepFormatado]);
+    res.status(200).json({ areas: resultado.rows });
   } catch (e) {
-    logErro("Criar area de atuação:", e);
-    res.status(400);
+    logErro('Erro ao listar áreas de atuação', e);
+    res.status(500).json({ erro: 'Erro ao listar áreas de atuação.' });
   }
 };
-
 
 /*
 * [Recebe]: id_gerente, cep
 * [Retorna]: Mensagem de confirmação
 */
-// ! Não testado
 async function criarAreaAtuacao(req, res){
   try {
-    const { id_gerente, cep } = req.body;
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const { cep } = req.body;
 
-    try {
-      const verificarDuplicata = `
-        SELECT * FROM area_de_atuacao
-        WHERE id_gerente = ${id_gerente}
-        AND cep = '${cep}'`;
-
-      const resultado = await querry(verificarDuplicata);
-
-      if (resultado.rows.length != 0) {
-        logAviso("CEP já existe", null);
-        return res.status(409).json({message: "CEP já existe."});
-      }
-    } catch (e) {
-      logErro("verificar duplicata area atuação: ", e);
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
     }
-   
-    const criacao = `
-    INSERT INTO area_de_atuacao (id_gerente, cep)
-    VALUES ( $1, $2 )
-    `
-    await querry(criacao, [id_gerente, cep]);
+    if (!cep) {
+      return res.status(400).json({ erro: 'CEP é obrigatório.' });
+    }
 
-    res.status(201).json({ mensagem: "Area de atuação criado" });
+    const validCep = new CEP(cep);
+    if (!validCep) {
+      return res.status(400).json({ erro: 'CEP inválido.' });
+    }
+
+    const verificarDuplicata = `
+      SELECT id FROM area_de_atuacao
+      WHERE id_gerente = $1
+      AND cep = $2
+    `;
+
+    const duplicata = await querry(verificarDuplicata, [Number(id_gerente), validCep]);
+    if (duplicata.rows.length > 0) {
+      return res.status(409).json({ mensagem: 'CEP já existe.' });
+    }
+
+    const criacao = `
+      INSERT INTO area_de_atuacao (id_gerente, cep)
+      VALUES ($1, $2)
+      RETURNING id, id_gerente, cep
+    `;
+
+    const resultado = await querry(criacao, [Number(id_gerente), validCep]);
+    res.status(201).json({ mensagem: 'Área de atuação criada com sucesso.', area: resultado.rows[0] });
   } catch (e) {
-    logErro("Criar area de atuação:", e);
-    res.status(400);
+    logErro('Erro ao criar área de atuação', e);
+    res.status(500).json({ erro: 'Erro ao criar área de atuação.' });
   }
 };
+
 /*
-* [Recebe]: id (próprio), id_gerente (segurança)
+* [Recebe]: id_area_atuacao, id_gerente (segurança)
 * [Retorna]: Mensagem de confirmação
 */
-// ! Não testado
 async function deletarAreaAtuacao(req, res){
   try {
-    const { id_area_atuacao, id_gerente } = req.body;
+    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const id_area_atuacao = req.body.id_area_atuacao;
 
-    const deletarMotoristas = `
-    DELETE FROM area_de_atuacao
-    WHERE id = $1
-    AND id_gerente = $2
-    `
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+    if (!id_area_atuacao || Number.isNaN(Number(id_area_atuacao))) {
+      return res.status(400).json({ erro: 'ID da área de atuação inválido.' });
+    }
 
-    await querry(deletarMotoristas, [ id_area_atuacao, id_gerente]);
+    const deletarArea = `
+      DELETE FROM area_de_atuacao
+      WHERE id = $1
+      AND id_gerente = $2
+      RETURNING id
+    `;
 
-    res.status(200).json({
-      message: "Deletado com sucesso"
-    });
+    const resultado = await querry(deletarArea, [Number(id_area_atuacao), Number(id_gerente)]);
 
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Área de atuação não encontrada ou não autorizada.' });
+    }
+
+    res.status(200).json({ message: 'Área de atuação deletada com sucesso.' });
   } catch (e) {
-    res.status(400).res({
-      message: "Não foi possível deletar o motorista.",
-      error: e
-    });
-    logErro("Erro na função listarMotoristas em gerente: ", e)
+    logErro('Erro ao deletar área de atuação', e);
+    res.status(500).json({ erro: 'Erro ao deletar área de atuação.' });
   }
 };
 
-export {deletarMotorista, criarMotorista, listarMotoristas, login, listarAreasAtuacao, criarAreaAtuacao, deletarAreaAtuacao}
+export { deletarMotorista, criarMotorista, listarMotoristas, login, listarAreasAtuacao, criarAreaAtuacao, deletarAreaAtuacao }
