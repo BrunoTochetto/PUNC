@@ -87,7 +87,7 @@ async function registrarGerente(nome, senha, email) {
 */
 async function listarMotoristas(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
+    const { id_gerente } = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -113,8 +113,7 @@ async function listarMotoristas(req, res){
 */
 async function criarMotorista(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
-    const { nome_dispositivo, mac, identificacao_caminhao, tipo_lixo } = req.body;
+    const { id_gerente, nome_dispositivo, mac } = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -125,7 +124,7 @@ async function criarMotorista(req, res){
     }
 
     const duplicado = await querry(
-      'SELECT id FROM motoristas WHERE mac = $1 AND id_gerente = $2',
+      'SELECT id FROM motoristas AND id_gerente = $2',
       [mac, Number(id_gerente)]
     );
 
@@ -134,17 +133,15 @@ async function criarMotorista(req, res){
     }
 
     const inserirMotorista = `
-      INSERT INTO motoristas (nome_dispositivo, mac, identificacao_caminhao, tipo_lixo, id_gerente)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, nome_dispositivo, mac, identificacao_caminhao, tipo_lixo, id_gerente, data_criacao
+      INSERT INTO motoristas (nome_dispositivo, mac, id_gerente)
+      VALUES ($1, $2, $3)
+      RETURNING id, nome_dispositivo, mac, id_gerente, data_criacao
     `;
 
     const resultado = await querry(inserirMotorista, [
       nome_dispositivo,
       mac,
-      identificacao_caminhao || null,
-      tipo_lixo || null,
-      Number(id_gerente)
+      id_gerente,
     ]);
 
     res.status(201).json({ mensagem: 'Motorista criado com sucesso.', motorista: resultado.rows[0] });
@@ -160,9 +157,10 @@ async function criarMotorista(req, res){
 */
 async function deletarMotorista(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
-    const id_motorista = req.body.id_motorista;
+    
+    const {id_gerente, id_motorista} = req.body;
 
+    // # Creio que essas verificações não são necessárias pois serão enviadas pelo front sem o usuário saber. Então se der erro não tem muito o que corrigir.
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
     }
@@ -197,8 +195,8 @@ async function deletarMotorista(req, res){
 */
 async function listarAreasAtuacao(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
-    const cep = req.body.cep || '';
+
+    const {id_gerente, cep} = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -234,8 +232,7 @@ async function listarAreasAtuacao(req, res){
 */
 async function criarAreaAtuacao(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
-    const { cep } = req.body;
+    const { cep, id_gerente } = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -255,7 +252,7 @@ async function criarAreaAtuacao(req, res){
       AND cep = $2
     `;
 
-    const duplicata = await querry(verificarDuplicata, [Number(id_gerente), validCep]);
+    const duplicata = await querry(verificarDuplicata, [Number(id_gerente), validCep.value()]);
     if (duplicata.rows.length > 0) {
       return res.status(409).json({ mensagem: 'CEP já existe.' });
     }
@@ -266,7 +263,7 @@ async function criarAreaAtuacao(req, res){
       RETURNING id, id_gerente, cep
     `;
 
-    const resultado = await querry(criacao, [Number(id_gerente), validCep]);
+    const resultado = await querry(criacao, [Number(id_gerente), validCep.value()]);
     res.status(201).json({ mensagem: 'Área de atuação criada com sucesso.', area: resultado.rows[0] });
   } catch (e) {
     logErro('Erro ao criar área de atuação', e);
@@ -280,8 +277,8 @@ async function criarAreaAtuacao(req, res){
 */
 async function deletarAreaAtuacao(req, res){
   try {
-    const id_gerente = req.body.id_gerente || req.usuario?.id;
-    const id_area_atuacao = req.body.id_area_atuacao;
+    
+    const {id_area_atuacao, id_gerente} = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });

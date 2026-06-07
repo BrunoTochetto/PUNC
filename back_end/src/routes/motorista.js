@@ -8,6 +8,7 @@ router.get('/ativos', controller.ativos);
 
 router.patch('/:id/status', autenticacaoNecessaria, controller.status);
 
+router.post('/:id/localizacao', controller.localizacao);
 
 router.patch('/acharTodosEmRaio', controller.acharTodosEmRaio);
 

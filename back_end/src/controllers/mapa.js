@@ -7,7 +7,7 @@ import { querry } from '../services/querry.js';
 */
 async function emPercurso(req, res) {
   try {
-    const id_gerente = req.query.id_gerente ? Number(req.query.id_gerente) : undefined;
+    const id_gerente = req.body.id_gerente ? Number(req.body.id_gerente) : undefined;
 
     let sql = `
       SELECT *
@@ -26,7 +26,7 @@ async function emPercurso(req, res) {
       values.push(id_gerente);
     }
 
-    sql += '\n      ORDER BY tempo_comeco DESC';
+    sql += 'ORDER BY tempo_comeco DESC';
 
     const resultado = await querry(sql, values);
     return res.status(200).json({ trajetosEmPercurso: resultado.rows });
