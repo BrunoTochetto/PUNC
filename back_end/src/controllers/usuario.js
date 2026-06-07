@@ -3,10 +3,11 @@ import {Coordenadas} from '../models/coordenadas.js';
 import {MACAddress} from'../models/macAddress.js';
 import {CEP} from'../models/cep.js';
 import { logErro, logAviso, logInfo } from '../services/logErrors.js';
+import { notificacoes } from '../services/notificacoes.js';
 
 /*
 * [Recebe]: nome_dispositivo, mac, latitude, longitude
-* [Retorna]: celula x e y para cadastro no FCM
+* [Retorna]: celula x, y e topico FCM (criado pelo back-end; inscrição no front-end)
 */
 async function cadastro(req, res) {
 	try {
@@ -76,9 +77,23 @@ async function cadastro(req, res) {
 		`;
 		const resultadoCelula = await querry(queryCelula, [usuario.id_celula]);
 		const celula = resultadoCelula.rows[0] || { cell_x: null, cell_y: null };
+
+		let topicoCelula = null;
+		if (celula.cell_x != null && celula.cell_y != null) {
+			try {
+				const resultadoTopico = await notificacoes.criarTopicoCelula(celula.cell_x, celula.cell_y);
+				topicoCelula = resultadoTopico.topico;
+			} catch (err) {
+				topicoCelula = notificacoes.celulaParaTopico(celula.cell_x, celula.cell_y);
+				await logAviso(
+					`Cadastro: falha ao criar tópico FCM da célula (${celula.cell_x}, ${celula.cell_y})`,
+					err
+				);
+			}
+		}
 		
 		await logInfo(
-			`Usuário cadastrado: ID=${usuario.id}, MAC=${macAddress.padrao}, Device=${nome_dispositivo}, Célula(${celula.cell_x}, ${celula.cell_y})`
+			`Usuário cadastrado: ID=${usuario.id}, MAC=${macAddress.padrao}, Device=${nome_dispositivo}, Célula(${celula.cell_x}, ${celula.cell_y}), Tópico=${topicoCelula ?? 'indisponível'}`
 		);
 
 		res.status(201).json({
@@ -89,7 +104,8 @@ async function cadastro(req, res) {
 				id_regiao: usuario.id_regiao,
 				celula: {
 					x: celula.cell_x,
-					y: celula.cell_y
+					y: celula.cell_y,
+					topico: topicoCelula,
 				}
 			}
 		});

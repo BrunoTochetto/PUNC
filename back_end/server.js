@@ -4,16 +4,18 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import { logInfo } from './src/services/logErrors.js';
+import { initFirebase } from './src/services/firebase.js';
 
 import usuarioRoutes from './src/routes/usuario.js';
 import gerenteRoutes from './src/routes/gerente.js';
 import motoristaRoutes from './src/routes/motorista.js';
 import mapaRoutes from './src/routes/mapa.js';
 import horarioColetaRoutes from './src/routes/horarioColeta.js';
+import './src/services/websocket.js';
 
 const app = express();
 
-import './src/services/websocket.js';
+initFirebase();
 
 app.use(helmet());
 app.use(cors());

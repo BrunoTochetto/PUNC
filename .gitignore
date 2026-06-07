@@ -268,4 +268,6 @@ back_end/.env
 back_end/.env
 punc/lib/nucleo/segredos/segredos.env
 back_end/segredo.env
+back_end/firebase-service-account.json
+back_end/*firebase*adminsdk*.json
 back_end/package-lock.json
