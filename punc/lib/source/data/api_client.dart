@@ -78,30 +78,35 @@ class ApiClient {
           final streamed = await _client.send(requisicao);
           resposta = await http.Response.fromStream(streamed);
         }
+        break;
       case 'POST':
         resposta = await _client.post(
           uri,
           headers: headers,
           body: corpo == null ? null : jsonEncode(corpo),
         );
+        break;
       case 'PUT':
         resposta = await _client.put(
           uri,
           headers: headers,
           body: corpo == null ? null : jsonEncode(corpo),
         );
+        break;
       case 'PATCH':
         resposta = await _client.patch(
           uri,
           headers: headers,
           body: corpo == null ? null : jsonEncode(corpo),
         );
+        break;
       case 'DELETE':
         resposta = await _client.delete(
           uri,
           headers: headers,
           body: corpo == null ? null : jsonEncode(corpo),
         );
+        break;
       default:
         throw FalhaApi('Método HTTP não suportado: $metodo');
     }

@@ -49,7 +49,7 @@ class RepositorioHorarioColeta {
         'horario_estimado': horarioEstimado,
         'dia_semana': diaSemana,
         'tipo_lixo': tipoLixo,
-        if (comentarios != null) 'comentarios': comentarios,
+        'comentarios': ?comentarios,
       },
     );
 
@@ -72,12 +72,12 @@ class RepositorioHorarioColeta {
       corpo: {
         'id_gerente': idGerente,
         'id_horario': idHorario,
-        if (idAreaAtuacao != null) 'id_area_atuacao': idAreaAtuacao,
-        if (horarioEstimado != null) 'horario_estimado': horarioEstimado,
-        if (diaSemana != null) 'dia_semana': diaSemana,
-        if (tipoLixo != null) 'tipo_lixo': tipoLixo,
-        if (comentarios != null) 'comentarios': comentarios,
-        if (ativo != null) 'ativo': ativo,
+        'id_area_atuacao': ?idAreaAtuacao,
+        'horario_estimado': ?horarioEstimado,
+        'dia_semana': ?diaSemana,
+        'tipo_lixo': ?tipoLixo,
+        'comentarios': ?comentarios,
+        'ativo': ?ativo,
       },
     );
 

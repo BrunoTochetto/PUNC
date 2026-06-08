@@ -1,207 +1,141 @@
 import 'package:flutter/material.dart';
-import 'package:punc/nucleo/temas/appCores.dart';
-import '../widgets/card_grupo_regiao.dart';
-import '../widgets/card_info_mapa.dart';
-import '../widgets/barra_busca_mapa.dart';
-import '../widgets/pin_mapa.dart';
 
-class MapaGruposPage extends StatelessWidget {
+import '../data/modelos/motorista.dart';
+import '../viewmodels/mapa_view_model.dart';
+import '../widgets/estado_pagina.dart';
+import '../widgets/punc_app_shell.dart';
+
+class MapaGruposPage extends StatefulWidget {
   const MapaGruposPage({super.key});
 
   @override
+  State<MapaGruposPage> createState() => _MapaGruposPageState();
+}
+
+class _MapaGruposPageState extends State<MapaGruposPage> {
+  final MapaViewModel _viewModel = MapaViewModel();
+  late Future<List<LocalizacaoMotorista>> _trajetosFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregar();
+  }
+
+  void _carregar() {
+    _trajetosFuture = _viewModel.carregarTrajetos();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: PUNCCores.claroSuperficie,
-      appBar: AppBar(
-        backgroundColor: PUNCCores.claroAppBar,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.eco, color: PUNCCores.claroOnAppBar, size: 24),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: PUNCCores.claroOnAppBar),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.settings_outlined, color: PUNCCores.claroOnAppBar),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.menu, color: PUNCCores.claroOnAppBar),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          // Área do Mapa
-          Expanded(
-            flex: 3,
-            child: Stack(
-              children: [
-                // Simulação do Mapa (Imagem de fundo ou Container colorido)
-                Container(
-                  color: const Color(0xFFDFF1E8),
-                  child: Center(
-                    child: Opacity(
-                      opacity: 0.3,
-                      child: Icon(Icons.map, size: 300, color: Colors.white),
-                    ),
-                  ),
-                ),
-                
-                // Pins no Mapa
-                const PinMapa(cor: Colors.blue, top: 150, left: 80),
-                const PinMapa(cor: Colors.green, top: 120, left: 180),
-                const PinMapa(cor: Colors.brown, top: 140, left: 280),
-                const PinMapa(cor: Colors.black54, top: 200, left: 170),
-                const PinMapa(cor: Colors.lightGreen, top: 300, left: 90),
+    return PuncAppShell(
+      selectedRoute: '/mapa',
+      body: FutureBuilder<List<LocalizacaoMotorista>>(
+        future: _trajetosFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const EstadoCarregando();
+          }
 
-                // Card Superior
-                const Positioned(
-                  top: 20,
-                  left: 10,
-                  right: 10,
-                  child: CardInfoMapa(
-                    titulo: 'Grupos da Região',
-                    subtitulo: 'Veja no mapa a localização dos grupos de coleta da sua região',
-                  ),
-                ),
+          if (snapshot.hasError) {
+            return EstadoErro(
+              mensagem: 'Nao foi possivel carregar os caminhoes no mapa.',
+              onTentarNovamente: () => setState(_carregar),
+            );
+          }
 
-                // Barra de Busca Inferior
-                const Positioned(
-                  bottom: 20,
-                  left: 10,
-                  right: 10,
-                  child: BarraBuscaMapa(),
-                ),
-              ],
-            ),
-          ),
+          final trajetos = snapshot.data ?? [];
+          if (trajetos.isEmpty) {
+            return const EstadoVazio(
+              mensagem: 'Nenhum caminhao em percurso neste momento.',
+            );
+          }
 
-          // Lista Lateral de Grupos
-          Container(
-            width: 140,
-            color: Colors.white.withOpacity(0.5),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Grupos da Região',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      CardGrupoRegiao(
-                        nome: 'Recicla Norte',
-                        tipo: 'Coleta Seletiva',
-                        local: 'Industrial',
-                        distancia: '2,5 km de você',
-                        corBorda: PUNCCores.escuroPrimaria,
-                      ),
-                      CardGrupoRegiao(
-                        nome: 'Eco Centro',
-                        tipo: 'Coleta Seletiva',
-                        local: 'Centro',
-                        distancia: '1,5 km de você',
-                        corBorda: PUNCCores.escuroPrimaria,
-                      ),
-                      CardGrupoRegiao(
-                        nome: 'Orgânicos Sul',
-                        tipo: 'Resíduos Orgânicos',
-                        local: 'Universitário',
-                        distancia: '3,1 km de você',
-                        corBorda: PUNCCores.escuroPrimaria,
-                      ),
-                      CardGrupoRegiao(
-                        nome: 'Verde Vida',
-                        tipo: 'Coleta Seletiva',
-                        local: 'Bela Vista',
-                        distancia: '2,8 km de você',
-                        corBorda: PUNCCores.escuroPrimaria,
-                      ),
-                      CardGrupoRegiao(
-                        nome: 'Linha Limpa',
-                        tipo: 'Coleta Seletiva',
-                        local: 'Linha Barra Fria',
-                        distancia: '4,2 km de você',
-                        corBorda: PUNCCores.escuroPrimaria,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.map_outlined, size: 16),
-                    label: const Text('VER LISTA COMPLETA', style: TextStyle(fontSize: 10)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: PUNCCores.escuroPrimaria,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        height: 80,
-        color: PUNCCores.claroAppBar,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.map_outlined, 'Mapa', true),
-            _buildNavItem(Icons.groups_outlined, 'Grupos', false),
-            _buildNavItem(Icons.calendar_today_outlined, 'Cronograma', false),
-            _buildNavItem(Icons.person_outline, 'Perfil', false),
-          ],
-        ),
+          return _MapaConteudo(trajetos: trajetos);
+        },
       ),
     );
   }
+}
 
-  Widget _buildNavItem(IconData icon, String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: isSelected
-          ? BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            )
-          : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+class _MapaConteudo extends StatelessWidget {
+  const _MapaConteudo({required this.trajetos});
+
+  final List<LocalizacaoMotorista> trajetos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          color: const Color(0xFFD9F7E8),
+          child: const Center(
+            child: Icon(Icons.map_outlined, size: 220, color: Colors.white70),
           ),
-        ],
-      ),
+        ),
+        Positioned(
+          top: 18,
+          left: 32,
+          right: 32,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Caminhao a caminho',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  Text('Caminhoes em rota: ${trajetos.length}'),
+                ],
+              ),
+            ),
+          ),
+        ),
+        ...trajetos.asMap().entries.map((entry) {
+          final index = entry.key;
+          final trajeto = entry.value;
+          return Positioned(
+            top: 150 + (index * 34) % 180,
+            left: 70 + (index * 58) % 220,
+            child: Tooltip(
+              message: trajeto.identificacaoCaminhao ?? 'Caminhao em rota',
+              child: const Icon(
+                Icons.location_on,
+                color: Color(0xFFE03B3B),
+                size: 34,
+              ),
+            ),
+          );
+        }),
+        Positioned(
+          left: 18,
+          right: 18,
+          bottom: 18,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '30 de Outubro, 2026',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      Text('Acompanhe a coleta em tempo real'),
+                    ],
+                  ),
+                  Text('${trajetos.length} ativo(s)'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

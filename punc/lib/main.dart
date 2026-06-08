@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import './nucleo/temas/appTheme.dart';
+import './source/views/configuracao_usuario_page.dart';
 import './source/views/cronograma.dart';
 import './source/views/gerenciamento.dart';
-import './source/views/perfil.dart';
-import './source/views/configuracao_usuario_page.dart';
 import './source/views/gerenciamento2.dart';
 import './source/views/mapa_grupos_page.dart';
-
+import './source/views/perfil.dart';
 
 void main() {
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: PUNCAppTheme.theme,
       darkTheme: PUNCAppTheme.darkTheme,
-      home: CronogramaPage(),
-      
-    )
+      home: const CronogramaPage(),
+      routes: {
+        '/cronograma': (_) => const CronogramaPage(),
+        '/mapa': (_) => const MapaGruposPage(),
+        '/gerenciamento': (_) => const GerenciamentoPage(),
+        '/gerenciamento/novo': (_) => const Gerenciamento2Page(),
+        '/perfil': (_) => const PerfilPage(),
+        '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
+      },
+    ),
   );
 }
 

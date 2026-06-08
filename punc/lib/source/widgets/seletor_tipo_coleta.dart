@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../nucleo/temas/appCores.dart';
 
 class SeletorTipoColeta extends StatelessWidget {
   const SeletorTipoColeta({super.key});

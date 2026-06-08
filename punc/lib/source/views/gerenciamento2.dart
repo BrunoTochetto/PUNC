@@ -4,7 +4,7 @@ import '../widgets/custom_text_field.dart';
 import '../widgets/truck_card.dart';
 
 class Gerenciamento2Page extends StatefulWidget {
-  const Gerenciamento2Page({Key? key}) : super(key: key);
+  const Gerenciamento2Page({super.key});
 
   @override
   State<Gerenciamento2Page> createState() => _Gerenciamento2PageState();
