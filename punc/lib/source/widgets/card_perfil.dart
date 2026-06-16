@@ -14,14 +14,24 @@ class CardPerfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // Cores Forçadas para Branco Puro e Bordas Cinzas (Identidade Figma)
+    const Color corCardBranco = Colors.white;
+    const Color corBordaCinza = Color(0xFFE0E0E0);
+    const Color corIconeVerde = Color(0xFF5E996E); // Verde folha suave do design
+    const Color corTextoPrincipal = Color(0xFF2C2C2C);
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        color: corCardBranco, // Branco Puro
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: corBordaCinza), // Borda Cinza Clara
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -29,13 +39,14 @@ class CardPerfil extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: const Color(0xFF4CAF50), size: 20),
+              Icon(icon, color: corIconeVerde, size: 20),
               const SizedBox(width: 8),
               Text(
                 title,
-                style: theme.textTheme.bodyLarge?.copyWith(
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
+                  color: corTextoPrincipal,
                 ),
               ),
             ],
@@ -50,8 +61,8 @@ class CardPerfil extends StatelessWidget {
                       width: 100,
                       child: Text(
                         detail.keys.first,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
+                        style: TextStyle(
+                          color: corTextoPrincipal.withOpacity(0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -59,9 +70,10 @@ class CardPerfil extends StatelessWidget {
                     Expanded(
                       child: Text(
                         detail.values.first,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
+                          color: corTextoPrincipal,
                         ),
                       ),
                     ),

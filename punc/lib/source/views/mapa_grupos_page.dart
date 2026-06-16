@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../data/modelos/motorista.dart';
 import '../viewmodels/mapa_view_model.dart';
 import '../widgets/estado_pagina.dart';

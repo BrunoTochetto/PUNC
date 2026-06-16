@@ -6,6 +6,9 @@ import '../widgets/card_veiculo.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
 
+// Importe sua classe de cores
+// import 'caminho_para_seu_arquivo_de_cores.dart';
+
 class GerenciamentoPage extends StatefulWidget {
   const GerenciamentoPage({super.key});
 
@@ -40,18 +43,21 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
   }
 
   Future<void> _excluir(MotoristaGerente motorista) async {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     final confirmou = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deseja remover este caminhao?'),
-        content: const Text('Essa acao nao pode ser desfeita.'),
+        title: const Text('Deseja remover este caminhão?'),
+        content: const Text('Essa ação não pode ser desfeita.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar', style: TextStyle(color: colorScheme.outline)),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
             child: const Text('Excluir'),
           ),
         ],
@@ -71,6 +77,8 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return PuncAppShell(
       selectedRoute: '/gerenciamento',
       body: SingleChildScrollView(
@@ -80,31 +88,58 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
           children: [
             Text(
               'Gerenciamento',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
             ),
-            const Text('Motoristas e Caminhoes'),
-            const SizedBox(height: 14),
+            Text(
+              'Motoristas e Caminhões',
+              style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+            ),
+            const SizedBox(height: 20),
+            
+            // Botão Adicionar (Verde no WF -> Ciano na Paleta)
             SizedBox(
               width: double.infinity,
-              height: 40,
+              height: 48,
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.pushNamed(context, '/gerenciamento/novo'),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Adicionar motorista/caminhao'),
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('Adicionar motorista/caminhão'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.secondary, // claroSecundaria (Ciano)
+                  foregroundColor: colorScheme.onSecondary,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ),
-            const SizedBox(height: 12),
+            
+            const SizedBox(height: 16),
+            
+            // Campo de Pesquisa
             TextField(
               controller: _buscaController,
-              decoration: const InputDecoration(
-                hintText: 'Pesquisar caminhao',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: 'Pesquisar caminhão',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
+                ),
               ),
               onChanged: (value) => setState(() => _filtro = value),
             ),
-            const SizedBox(height: 16),
+            
+            const SizedBox(height: 20),
+            
             FutureBuilder<List<MotoristaGerente>>(
               future: _motoristasFuture,
               builder: (context, snapshot) {
@@ -116,7 +151,7 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                   return SizedBox(
                     height: 260,
                     child: EstadoErro(
-                      mensagem: 'Nao foi possivel carregar os veiculos.',
+                      mensagem: 'Não foi possível carregar os veículos.',
                       onTentarNovamente: () => setState(_carregar),
                     ),
                   );
@@ -127,7 +162,7 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                   return const SizedBox(
                     height: 220,
                     child: EstadoVazio(
-                      mensagem: 'Nenhum motorista ou caminhao encontrado.',
+                      mensagem: 'Nenhum motorista ou caminhão encontrado.',
                     ),
                   );
                 }
@@ -136,26 +171,36 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                   children: [
                     ...motoristas.map(
                       (motorista) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: CardVeiculo(
                           title: motorista.identificacaoCaminhao ??
-                              'Caminhao ${motorista.idMotorista}',
+                              'Caminhão ${motorista.idMotorista}',
                           driver: motorista.nomeDispositivo,
                           plate: motorista.mac,
-                          phone: motorista.status ?? 'Status nao informado',
-                          status: motorista.status ?? 'Disponivel',
-                          statusColor: _corStatus(motorista.status),
+                          phone: motorista.status ?? 'Status não informado',
+                          status: motorista.status ?? 'Disponível',
+                          // Mapeamento de cores de status baseado na sua paleta
+                          statusColor: _corStatus(motorista.status, colorScheme),
                           onDelete: () => _excluir(motorista),
                         ),
                       ),
                     ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Botão Ver Todos (Verde Escuro no WF -> Roxo AppBar na Paleta)
                     SizedBox(
                       width: double.infinity,
-                      height: 40,
+                      height: 48,
                       child: ElevatedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.list, size: 18),
-                        label: const Text('Ver todos os veiculos'),
+                        icon: const Icon(Icons.list, size: 20),
+                        label: const Text('Ver todos os veículos'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4338CA), // claroAppBar
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
                       ),
                     ),
                   ],
@@ -179,11 +224,11 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
     }).toList();
   }
 
-  Color _corStatus(String? status) {
+  Color _corStatus(String? status, ColorScheme colorScheme) {
     final texto = status?.toLowerCase() ?? '';
     if (texto.contains('percurso') || texto.contains('rota')) {
-      return const Color(0xFF4AA564);
+      return colorScheme.secondary; // Ciano para "Em rota" (era verde)
     }
-    return const Color(0xFF2F80ED);
+    return colorScheme.primary; // Roxo para "Disponível" (era azul)
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:punc/nucleo/temas/appCores.dart';
 import '../data/modelos/perfil_usuario.dart';
 import '../viewmodels/perfil_view_model.dart';
 import '../widgets/estado_pagina.dart';
@@ -33,43 +33,60 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Identidade Visual: Tons Pastéis, Branco Puro e Bordas Cinzas
+    const Color corFundoPagina = Color(0xFFD3E4D8); // Verde pastel suave do fundo
+    const Color corBotaoPrimario = Color(0xFF5E996E); // Verde folha suave
+
     return PuncAppShell(
       selectedRoute: '/configuracoes',
-      body: FutureBuilder<PerfilUsuario?>(
-        future: _perfilFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const EstadoCarregando();
-          }
+      body: Container(
+        color: corFundoPagina,
+        child: FutureBuilder<PerfilUsuario?>(
+          future: _perfilFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const EstadoCarregando();
+            }
 
-          if (snapshot.hasError) {
-            return EstadoErro(
-              mensagem: 'Nao foi possivel carregar as configuracoes.',
-              onTentarNovamente: () => setState(_carregar),
+            if (snapshot.hasError) {
+              return EstadoErro(
+                mensagem: 'Não foi possível carregar as configurações.',
+                onTentarNovamente: () => setState(_carregar),
+              );
+            }
+
+            final perfil = snapshot.data;
+            if (perfil == null) {
+              return const EstadoVazio(
+                mensagem: 'Configurações não encontradas.',
+              );
+            }
+
+            return _ConfiguracaoConteudo(
+              perfil: perfil,
+              corBotao: corBotaoPrimario,
             );
-          }
-
-          final perfil = snapshot.data;
-          if (perfil == null) {
-            return const EstadoVazio(
-              mensagem: 'Configuracoes nao encontradas.',
-            );
-          }
-
-          return _ConfiguracaoConteudo(perfil: perfil);
-        },
+          },
+        ),
       ),
     );
   }
 }
 
 class _ConfiguracaoConteudo extends StatelessWidget {
-  const _ConfiguracaoConteudo({required this.perfil});
+  const _ConfiguracaoConteudo({
+    required this.perfil,
+    required this.corBotao,
+  });
 
   final PerfilUsuario perfil;
+  final Color corBotao;
 
   @override
   Widget build(BuildContext context) {
+    const Color corTextoEscuro = Color(0xFF2C2C2C);
+    const Color corBordaCinza = Color(0xFFE0E0E0);
+
     return Column(
       children: [
         Expanded(
@@ -79,72 +96,128 @@ class _ConfiguracaoConteudo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Configuracoes do usuario',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                  'Configurações do usuário',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
+                    color: corTextoEscuro,
+                  ),
+                ),
+                Text(
+                  'Gerencie suas preferências e informações da conta.',
+                  style: TextStyle(
+                    color: corTextoEscuro.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 22),
+                
+                // Bloco de Notificações
+                _buildContainer(
+                  context,
+                  child: Column(
+                    children: [
+                      SectionHeader(
+                        icon: Icons.notifications_none,
+                        title: 'Notificações',
                       ),
+                      const SettingSwitch(
+                        title: 'Receber notificações.',
+                        value: true,
+                        onChanged: null,
+                      ),
+                      const SettingSwitch(
+                        title: 'Notificações das rotas.',
+                        value: true,
+                        onChanged: null,
+                      ),
+                      const SettingSwitch(
+                        title: 'Notificações de atualizações de status.',
+                        value: true,
+                        onChanged: null,
+                      ),
+                    ],
+                  ),
                 ),
-                const Text('Gerencie suas preferencias e informacoes da conta.'),
+                
                 const SizedBox(height: 22),
-                const SectionHeader(
-                  icon: Icons.notifications_none,
-                  title: 'Notificacoes',
+                
+                // Bloco de Identificação
+                _buildContainer(
+                  context,
+                  child: Column(
+                    children: [
+                      const SectionHeader(
+                        icon: Icons.person_outline,
+                        title: 'Identificação de usuário',
+                      ),
+                      SettingTextField(
+                        label: 'Email',
+                        initialValue: perfil.email,
+                        suffixIcon: Icons.mail_outline,
+                      ),
+                      SettingTextField(
+                        label: 'Telefone',
+                        initialValue: perfil.telefone,
+                        suffixIcon: Icons.phone_android,
+                      ),
+                    ],
+                  ),
                 ),
-                const SettingSwitch(
-                  title: 'Receber notificacoes.',
-                  value: true,
-                  onChanged: null,
-                ),
-                const SettingSwitch(
-                  title: 'Notificacoes das rotas.',
-                  value: true,
-                  onChanged: null,
-                ),
-                const SettingSwitch(
-                  title: 'Notificacoes de atualizacoes de status.',
-                  value: true,
-                  onChanged: null,
-                ),
+                
                 const SizedBox(height: 22),
-                const SectionHeader(
-                  icon: Icons.person_outline,
-                  title: 'Identificacao de usuario',
-                ),
-                SettingTextField(
-                  label: 'Email',
-                  initialValue: perfil.email,
-                  suffixIcon: Icons.mail_outline,
-                ),
-                SettingTextField(
-                  label: 'Telefone',
-                  initialValue: perfil.telefone,
-                  suffixIcon: Icons.phone_android,
-                ),
-                const SizedBox(height: 22),
-                const SectionHeader(
-                  icon: Icons.edit_note,
-                  title: 'Preferencias',
-                ),
-                SettingSwitch(
-                  title: 'Modo escuro',
-                  value: perfil.modoEscuro,
-                  onChanged: null,
-                ),
-                SettingDropdown(
-                  label: 'Idioma',
-                  value: perfil.idioma,
+                
+                // Bloco de Preferências
+                _buildContainer(
+                  context,
+                  child: Column(
+                    children: [
+                      const SectionHeader(
+                        icon: Icons.edit_note,
+                        title: 'Preferências',
+                      ),
+                      SettingSwitch(
+                        title: 'Modo escuro',
+                        value: perfil.modoEscuro,
+                        onChanged: null,
+                      ),
+                      SettingDropdown(
+                        label: 'Idioma',
+                        value: perfil.idioma,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         ),
-        Padding(
+        
+        // Rodapé com Botões - Branco Puro e Borda
+        Container(
           padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: corBordaCinza)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: corBordaCinza),
+                    foregroundColor: corTextoEscuro,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
                   child: const Text('Cancelar'),
                 ),
               ),
@@ -152,13 +225,40 @@ class _ConfiguracaoConteudo extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Salvar Alteracoes'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: corBotao,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('Salvar Alterações', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  // Helper Corrigido: Branco Puro e Borda Cinza
+  Widget _buildContainer(BuildContext context, {required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, // Branco Puro
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0)), // Borda Cinza Clara
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

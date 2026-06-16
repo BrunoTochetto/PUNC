@@ -16,20 +16,23 @@ class CardCrono extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // Forçando cores fixas para bater com o wireframe, independente do tema global
+    const Color corCardBranco = Colors.white; 
+    const Color corBordaCinza = Color(0xFFE0E0E0);
+    const Color corTextoPrincipal = Color(0xFF2C2C2C);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface, // Usando a cor de superfície do tema
+        color: corCardBranco, // Forçado para Branco Puro
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: corBordaCinza), // Adicionada borda cinza clara
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -41,16 +44,17 @@ class CardCrono extends StatelessWidget {
               children: [
                 Text(
                   day,
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface, // Texto principal sobre superfície
+                    fontSize: 16,
+                    color: corTextoPrincipal,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Coleta: $time',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6), // Texto secundário com opacidade
+                  style: TextStyle(
+                    color: corTextoPrincipal.withOpacity(0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -67,10 +71,10 @@ class CardCrono extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 type,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 12,
-                  color: colorScheme.onSurface,
+                  color: corTextoPrincipal,
                 ),
               ),
             ],

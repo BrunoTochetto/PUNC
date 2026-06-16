@@ -26,78 +26,92 @@ class CardVeiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // Cores Forçadas para Branco Puro e Bordas Cinzas (Identidade Figma)
+    const Color corCardBranco = Colors.white;
+    const Color corBordaCinza = Color(0xFFE0E0E0);
+    const Color corTextoPrincipal = Color(0xFF2C2C2C);
+    const Color corIconeDestaque = Color(0xFF5BA7B4); // Verde água vibrante do design
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        color: corCardBranco, // Branco Puro
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: corBordaCinza), // Borda Cinza Clara
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Imagem/Ícone do Caminhão
               Container(
-                width: 60,
-                height: 60,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withOpacity(0.05),
+                  color: corIconeDestaque.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: corIconeDestaque.withOpacity(0.3), width: 1),
                 ),
                 child: Icon(
                   Icons.local_shipping,
-                  color: colorScheme.onSurface.withOpacity(0.3),
-                  size: 40,
+                  color: corIconeDestaque,
+                  size: 48,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
+              
+              // Informações Centrais
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: corTextoPrincipal,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      driver,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.6),
-                        fontSize: 13,
+                      'Motorista: $driver',
+                      style: TextStyle(
+                        color: corTextoPrincipal.withOpacity(0.6),
+                        fontSize: 12,
                       ),
                     ),
-                    const SizedBox(height: 2),
                     Text(
-                      plate,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.6),
-                        fontSize: 13,
+                      'Placa: $plate',
+                      style: TextStyle(
+                        color: corTextoPrincipal.withOpacity(0.6),
+                        fontSize: 12,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         const Icon(
-                          Icons.phone,
-                          size: 14,
-                          color: Color(0xFF4CAF50),
+                          Icons.phone_outlined,
+                          size: 16,
+                          color: corIconeDestaque,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 6),
                         Text(
                           phone,
                           style: const TextStyle(
-                            color: Color(0xFF4CAF50),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            color: corIconeDestaque,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -105,57 +119,48 @@ class CardVeiculo extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      status,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+              
+              // Status (Canto Superior Direito)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Divider(
-            color: theme.dividerColor.withOpacity(0.1),
-            height: 1,
-          ),
-          const SizedBox(height: 12),
+          
+          const SizedBox(height: 16),
+          const Divider(color: corBordaCinza, height: 1),
+          const SizedBox(height: 8),
+          
+          // Botões de Ação (Rodapé do Card)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildActionButton(
-                context,
                 icon: Icons.visibility_outlined,
                 label: 'Ver detalhes',
                 onPressed: onDetails ?? () {},
               ),
               _buildActionButton(
-                context,
                 icon: Icons.edit_outlined,
                 label: 'Editar',
                 onPressed: onEdit ?? () {},
               ),
               _buildActionButton(
-                context,
                 icon: Icons.delete_outline,
                 label: 'Excluir',
-                textColor: colorScheme.error,
+                textColor: const Color(0xFFE57373), // Vermelho suave para excluir
                 onPressed: onDelete ?? () {},
               ),
             ],
@@ -165,25 +170,23 @@ class CardVeiculo extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(
-    BuildContext context, {
+  Widget _buildActionButton({
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
     Color? textColor,
   }) {
-    final theme = Theme.of(context);
-    final color = textColor ?? theme.colorScheme.onSurface.withOpacity(0.6);
+    final color = textColor ?? const Color(0xFF2C2C2C).withOpacity(0.5);
 
     return TextButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18, color: color),
       label: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+      ),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
       ),
     );
   }

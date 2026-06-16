@@ -1,35 +1,70 @@
 import 'package:flutter/material.dart';
 
 class PUNCCores {
-  // Paleta clara
-  static Color claroPrimaria = const Color(0xFF4F46E5);
-  static Color claroOnPrimaria = Colors.white;
-  static Color claroSecundaria = const Color(0xFF06B6D4);
-  static Color claroOnSecundaria = Colors.white;
-  static Color claroErro = const Color(0xFFB00020);
-  static Color claroOnErro = Colors.white;
-  static Color claroSuperficie = const Color(0xFFF7F7FB);
-  static Color claroOnSuperficie = const Color(0xFF111827);
-  static Color claroFundo = const Color(0xFFFFFFFF);
-  static Color claroOnFundo = const Color(0xFF111827);
-  static Color claroAppBar = const Color(0xFF4338CA);
-  static Color claroOnAppBar = Colors.white;
-  static Color claroOutline = const Color(0xFF94A3B8);
+  // ==========================
+  // TEMA CLARO (Wireframe Figma)
+  // ==========================
 
-  // Paleta escura
-  static Color escuroPrimaria = const Color(0xFF818CF8);
-  static Color escuroOnPrimaria = const Color(0xFF111827);
-  static Color escuroSecundaria = const Color(0xFF22D3EE);
-  static Color escuroOnSecundaria = const Color(0xFF111827);
-  static Color escuroErro = const Color(0xFFCF6679);
-  static Color escuroOnErro = const Color(0xFF111827);
-  static Color escuroSuperficie = const Color(0xFF111827);
-  static Color escuroOnSuperficie = const Color(0xFFF3F4F6);
-  static Color escuroFundo = const Color(0xFF0B1120);
-  static Color escuroOnFundo = const Color(0xFFE5E7EB);
-  static Color escuroAppBar = const Color(0xFF1E1B4B);
-  static Color escuroOnAppBar = const Color(0xFFF9FAFB);
-  static Color escuroOutline = const Color(0xFF475569);
+  // Verde acinzentado do topo e rodapé
+  static const Color claroPrimaria = Color(0xFF5D7778);
+  static const Color claroOnPrimaria = Colors.white;
+
+  // Verde dos botões principais
+  static const Color claroSecundaria = Color(0xFF6B9D6F);
+  static const Color claroOnSecundaria = Colors.white;
+
+  // Erro
+  static const Color claroErro = Color(0xFFE57373);
+  static const Color claroOnErro = Colors.white;
+
+  // Fundo de elementos destacados
+  static const Color claroSuperficie = Color(0xFFDCECDD);
+  static const Color claroOnSuperficie = Color(0xFF333333);
+
+  // Fundo geral da aplicação
+  static const Color claroFundo = Color(0xFFF5F5F5);
+  static const Color claroOnFundo = Color(0xFF333333);
+
+  // AppBar
+  static const Color claroAppBar = Color(0xFF5D7778);
+  static const Color claroOnAppBar = Colors.white;
+
+  // Bordas
+  static const Color claroOutline = Color(0xFFE5E5E5);
+
+  // Texto secundário
+  static const Color claroTextoSecundario = Color(0xFF7A7A7A);
+
+  // Cards
+  static const Color claroCard = Colors.white;
+
+  // ==========================
+  // TEMA ESCURO
+  // ==========================
+
+  static const Color escuroPrimaria = Color(0xFF6B9D6F);
+  static const Color escuroOnPrimaria = Colors.white;
+
+  static const Color escuroSecundaria = Color(0xFF5D7778);
+  static const Color escuroOnSecundaria = Colors.white;
+
+  static const Color escuroErro = Color(0xFFCF6679);
+  static const Color escuroOnErro = Colors.white;
+
+  static const Color escuroSuperficie = Color(0xFF2F3A3A);
+  static const Color escuroOnSuperficie = Color(0xFFF5F5F5);
+
+  static const Color escuroFundo = Color(0xFF1F2727);
+  static const Color escuroOnFundo = Color(0xFFF5F5F5);
+
+  static const Color escuroAppBar = Color(0xFF2F3A3A);
+  static const Color escuroOnAppBar = Colors.white;
+
+  static const Color escuroOutline = Color(0xFF4A5656);
+
+  static const Color escuroTextoSecundario = Color(0xFFB0B0B0);
+
+  static const Color escuroCard = Color(0xFF374242);
 }
 
 ColorScheme PUNCCoresClaro() {
@@ -41,7 +76,7 @@ ColorScheme PUNCCoresClaro() {
     onSecondary: PUNCCores.claroOnSecundaria,
     error: PUNCCores.claroErro,
     onError: PUNCCores.claroOnErro,
-    surface: PUNCCores.claroSuperficie,
+    surface: PUNCCores.claroCard,
     onSurface: PUNCCores.claroOnSuperficie,
   );
 }
@@ -55,7 +90,7 @@ ColorScheme PUNCCoresEscuro() {
     onSecondary: PUNCCores.escuroOnSecundaria,
     error: PUNCCores.escuroErro,
     onError: PUNCCores.escuroOnErro,
-    surface: PUNCCores.escuroSuperficie,
+    surface: PUNCCores.escuroCard,
     onSurface: PUNCCores.escuroOnSuperficie,
   );
 }
