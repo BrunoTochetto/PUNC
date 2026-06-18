@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "545977285611",
+    "project_id": "punc-pi-2026",
+    "storage_bucket": "punc-pi-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545977285611:android:d8988a341a4ff433cbf7ae",
+        "android_client_info": {
+          "package_name": "com.example.punc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhY-tRMOxCIShYbrsCZAGhgSv0H0m7FbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

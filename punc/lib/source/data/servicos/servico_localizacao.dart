@@ -1,13 +1,43 @@
+import 'package:geolocator/geolocator.dart';
+
+import '../../../nucleo/erros/excecoes.dart';
 import '../modelos/localizacao_usuario.dart';
 
 class ServicoLocalizacao {
   Future<LocalizacaoUsuario> obterLocalizacaoAtual() async {
-    await Future<void>.delayed(const Duration(milliseconds: 450));
-    return const LocalizacaoUsuario(
-      latitude: -27.096,
-      longitude: -52.619,
-      descricao: 'Loteamento Jardim America',
-      cep: '89890000',
+    final permissaoConcedida = await _garantirPermissao();
+    if (!permissaoConcedida) {
+      throw const LocalizacaoExcecao(
+        'Permissao de localizacao negada ou indisponivel.',
+      );
+    }
+
+    final posicao = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
     );
+
+    return LocalizacaoUsuario(
+      latitude: posicao.latitude,
+      longitude: posicao.longitude,
+      descricao: 'Sua localizacao atual',
+      cep: '',
+    );
+  }
+
+  Future<bool> _garantirPermissao() async {
+    final servicoHabilitado = await Geolocator.isLocationServiceEnabled();
+    if (!servicoHabilitado) {
+      return false;
+    }
+
+    var permissao = await Geolocator.checkPermission();
+    if (permissao == LocationPermission.denied) {
+      permissao = await Geolocator.requestPermission();
+    }
+
+    return permissao == LocationPermission.always ||
+        permissao == LocationPermission.whileInUse;
   }
 }

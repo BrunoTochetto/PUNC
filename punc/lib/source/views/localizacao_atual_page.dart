@@ -81,13 +81,18 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                 ),
                 const SizedBox(height: 28),
                 Text(
-                  'Confirmar localizacao',
+                  'Primeiro acesso',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                 ),
                 const SizedBox(height: 12),
+                Text(
+                  'Confirme sua localizacao para receber notificacoes da coleta na sua regiao.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
                 Text(
                   localizacao.descricao,
                   textAlign: TextAlign.center,
@@ -107,7 +112,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                           width: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Usar esta localizacao'),
+                      : const Text('Confirmar e receber notificacoes'),
                 ),
                 TextButton(
                   onPressed: _salvando

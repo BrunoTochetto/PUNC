@@ -15,3 +15,4 @@ export 'repositorios/repositorio_mapa.dart';
 export 'repositorios/repositorio_horario_coleta.dart';
 export 'servicos/servico_localizacao.dart';
 export 'servicos/servico_notificacoes.dart';
+export 'servicos/servico_preferencias_usuario.dart';
