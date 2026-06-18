@@ -136,6 +136,18 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                         value: true,
                         onChanged: null,
                       ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/debug-notificacoes',
+                          ),
+                          icon: const Icon(Icons.bug_report_outlined),
+                          label: const Text('Abrir debug de notificacoes'),
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -76,10 +76,25 @@ class ServicoNotificacoes {
     }
   }
 
+  Future<String?> obterTokenFcm() async {
+    try {
+      return await _messaging.getToken();
+    } catch (e) {
+      throw NotificacaoExcecao(
+        'Nao foi possivel obter o token FCM do dispositivo: $e',
+      );
+    }
+  }
+
   Future<InscricaoNotificacao> inscreverUsuario(
     ResultadoCadastroUsuario cadastro,
   ) async {
     final topico = topicoParaCadastro(cadastro);
+    final inscricaoBackend = cadastro.usuario.inscricaoFcm;
+
+    if (inscricaoBackend?.inscrito == true) {
+      return InscricaoNotificacao(inscrito: true, topico: topico);
+    }
 
     try {
       await inscreverNoTopico(topico);
@@ -105,14 +120,19 @@ class ServicoNotificacoes {
   }
 
   static String topicoParaCadastro(ResultadoCadastroUsuario cadastro) {
+    final topicoBackend = cadastro.usuario.celula.topico?.trim();
+    if (topicoBackend != null && topicoBackend.isNotEmpty) {
+      return topicoBackend;
+    }
+
     final x = cadastro.usuario.celula.x;
     final y = cadastro.usuario.celula.y;
     if (x == null || y == null) {
       throw const NotificacaoExcecao(
-        'Backend nao retornou a celula do usuario.',
+        'Backend nao retornou o topico nem a celula do usuario.',
       );
     }
-    return 'celula-$x-$y';
+    return 'celula_${x}_$y';
   }
 
   void dispose() {
@@ -122,16 +142,25 @@ class ServicoNotificacoes {
   }
 
   Future<void> _inscreverTopico(String topico) async {
-    if (_topicoAtual == topico) {
+    final topicoNormalizado = topico.trim();
+    if (topicoNormalizado.isEmpty) {
+      throw const NotificacaoExcecao(
+        'Topico FCM invalido ou vazio para inscricao.',
+      );
+    }
+
+    if (_topicoAtual == topicoNormalizado) {
       return;
     }
+
+    await _messaging.getToken();
 
     if (_topicoAtual != null) {
       await _messaging.unsubscribeFromTopic(_topicoAtual!);
     }
 
-    await _messaging.subscribeToTopic(topico);
-    _topicoAtual = topico;
+    await _messaging.subscribeToTopic(topicoNormalizado);
+    _topicoAtual = topicoNormalizado;
   }
 
   Future<void> _solicitarPermissao() async {

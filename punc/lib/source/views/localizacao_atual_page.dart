@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/modelos/localizacao_usuario.dart';
 import '../viewmodels/localizacao_view_model.dart';
 import '../widgets/estado_pagina.dart';
+import 'debug_notificacoes_page.dart';
 
 class LocalizacaoAtualPage extends StatefulWidget {
   const LocalizacaoAtualPage({super.key});
@@ -29,14 +30,28 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
   Future<void> _confirmar(LocalizacaoUsuario localizacao) async {
     setState(() => _salvando = true);
     try {
-      await _viewModel.configurarNotificacoes(localizacao: localizacao);
+      final resultado = await _viewModel.configurarNotificacoes(
+        localizacao: localizacao,
+      );
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/mapa');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => DebugNotificacoesPage(resultado: resultado),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nao foi possivel configurar as notificacoes.'),
+        SnackBar(
+          content: const Text('Nao foi possivel configurar as notificacoes.'),
+          action: SnackBarAction(
+            label: 'Debug',
+            onPressed: () => Navigator.pushNamed(
+              context,
+              '/debug-notificacoes',
+            ),
+          ),
         ),
       );
     } finally {
@@ -119,6 +134,16 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/mapa'),
                   child: const Text('Configurar depois'),
+                ),
+                TextButton.icon(
+                  onPressed: _salvando
+                      ? null
+                      : () => Navigator.pushNamed(
+                            context,
+                            '/debug-notificacoes',
+                          ),
+                  icon: const Icon(Icons.bug_report_outlined),
+                  label: const Text('Abrir debug de notificacoes'),
                 ),
               ],
             ),

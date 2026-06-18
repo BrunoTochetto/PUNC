@@ -52,9 +52,9 @@ const logger = winston.createLogger({
 
 // Se em desenvolvimento, também logar no console
 if (process.env.NODE_ENV !== 'production') {
-  // logger.add(new winston.transports.Console({
-  //   format: winston.format.simple(),
-  // }));
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
 }
 
 // Auxiliares

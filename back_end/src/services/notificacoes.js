@@ -110,12 +110,15 @@ class Notificacoes {
 
 	async criarTopicoCelula(celulaX, celulaY) {
 		const topico = this.celulaParaTopico(celulaX, celulaY);
+		console.info(`[FCM] Preparando topico da celula (${celulaX}, ${celulaY}): ${topico}`);
 
 		if (this._topicosCriados.has(topico)) {
+			console.info(`[FCM] Topico ja registrado nesta execucao: ${topico}`);
 			return { topico, criado: false, motivo: 'topico_ja_registrado' };
 		}
 
 		if (!isFirebaseConfigurado()) {
+			console.info(`[FCM] Firebase nao configurado. Topico resolvido, mas nao validado no FCM: ${topico}`);
 			return { topico, criado: false, motivo: 'firebase_nao_configurado' };
 		}
 
@@ -132,10 +135,48 @@ class Notificacoes {
 
 			this._topicosCriados.add(topico);
 			logInfo(`Tópico FCM criado: ${topico} (${messageId})`);
+			console.info(`[FCM] Topico criado/validado com sucesso: ${topico} messageId=${messageId}`);
 			return { topico, criado: true, messageId };
 		} catch (erro) {
 			logErro(`Erro ao criar tópico FCM ${topico}`, erro);
+			console.error(`[FCM] Erro ao criar/validar topico ${topico}: ${erro.message}`);
 			throw erro;
+		}
+	}
+
+	async inscreverTokenNoTopico(token, topico) {
+		this.validarTopico(topico);
+
+		if (!token || typeof token !== 'string' || token.trim().length === 0) {
+			return { inscrito: false, topico, motivo: 'token_fcm_ausente' };
+		}
+
+		if (!isFirebaseConfigurado()) {
+			console.info(`[FCM] Firebase nao configurado. Token nao inscrito no topico: ${topico}`);
+			return { inscrito: false, topico, motivo: 'firebase_nao_configurado' };
+		}
+
+		try {
+			const messaging = getMessaging();
+			const resposta = await messaging.subscribeToTopic([token.trim()], topico);
+			const sucesso = resposta.successCount > 0 && resposta.failureCount === 0;
+			const erro = resposta.errors?.[0]?.error?.message ?? null;
+
+			console.info(
+				`[FCM] Inscricao server-side no topico ${topico}: sucesso=${resposta.successCount}, falhas=${resposta.failureCount}`
+			);
+
+			return {
+				inscrito: sucesso,
+				topico,
+				sucesso: resposta.successCount,
+				falhas: resposta.failureCount,
+				erro,
+			};
+		} catch (erro) {
+			console.error(`[FCM] Erro ao inscrever token no topico ${topico}: ${erro.message}`);
+			logErro(`Erro ao inscrever token FCM no tópico ${topico}`, erro);
+			return { inscrito: false, topico, motivo: 'erro_firebase', erro: erro.message };
 		}
 	}
 

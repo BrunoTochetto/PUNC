@@ -14,6 +14,7 @@ class CadastrarUsuario {
     required String mac,
     required double latitude,
     required double longitude,
+    String? fcmToken,
   }) {
     if (nomeDispositivo.trim().isEmpty) {
       throw ArgumentError('Nome do dispositivo é obrigatório.');
@@ -27,6 +28,7 @@ class CadastrarUsuario {
       mac: mac.trim(),
       latitude: latitude,
       longitude: longitude,
+      fcmToken: fcmToken,
     );
   }
 }

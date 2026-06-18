@@ -5,11 +5,11 @@ class ApiConfig {
 
   static const String baseUrl = String.fromEnvironment(
     'PUNC_API_URL',
-    defaultValue: 'http://localhost:1000',
+    defaultValue: 'http://192.168.0.34:2000',
   );
 
   static const String wsUrl = String.fromEnvironment(
     'PUNC_WS_URL',
-    defaultValue: 'ws://localhost:8080',
+    defaultValue: 'ws://192.168.0.34:8080',
   );
 }

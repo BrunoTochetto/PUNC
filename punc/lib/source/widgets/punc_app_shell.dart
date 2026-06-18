@@ -34,7 +34,7 @@ class PuncAppShell extends StatelessWidget {
           IconButton(
             tooltip: 'Notificacoes',
             icon: const Icon(Icons.notifications_none, color: corIconeAppBar),
-            onPressed: () {},
+            onPressed: () => Navigator.pushNamed(context, '/debug-notificacoes'),
           ),
           IconButton(
             tooltip: 'Configuracoes',
@@ -81,6 +81,12 @@ class PuncAppShell extends StatelessWidget {
                 selectedRoute: selectedRoute,
                 icon: Icons.person_outline,
                 label: 'Perfil',
+              ),
+              _MenuItem(
+                route: '/debug-notificacoes',
+                selectedRoute: selectedRoute,
+                icon: Icons.bug_report_outlined,
+                label: 'Debug notificacoes',
               ),
             ],
           ),

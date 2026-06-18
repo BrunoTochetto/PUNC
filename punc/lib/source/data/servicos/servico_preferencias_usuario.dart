@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +30,9 @@ class ServicoPreferenciasUsuario {
   static const _chaveConfigurado = 'usuario_configurado';
   static const _chaveTopico = 'topico_fcm';
   static const _chaveIdDispositivo = 'id_dispositivo';
+  static final RegExp _macRegex = RegExp(
+    r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$',
+  );
 
   Future<PreferenciasUsuario> carregar() async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,8 +55,11 @@ class ServicoPreferenciasUsuario {
 
   Future<IdentificacaoDispositivo> obterIdentificacaoDispositivo() async {
     final prefs = await SharedPreferences.getInstance();
-    final idDispositivo = prefs.getString(_chaveIdDispositivo) ??
-        'PUNC-${DateTime.now().millisecondsSinceEpoch.toRadixString(16).toUpperCase()}';
+    var idDispositivo = prefs.getString(_chaveIdDispositivo);
+    if (idDispositivo == null || !_macRegex.hasMatch(idDispositivo)) {
+      idDispositivo = _gerarMacLocal();
+      await prefs.setString(_chaveIdDispositivo, idDispositivo);
+    }
 
     final plugin = DeviceInfoPlugin();
     var nomeDispositivo = 'Dispositivo PUNC';
@@ -73,5 +80,17 @@ class ServicoPreferenciasUsuario {
       nomeDispositivo: nomeDispositivo,
       mac: idDispositivo,
     );
+  }
+
+  String _gerarMacLocal() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(6, (_) => random.nextInt(256));
+
+    // Endereco localmente administrado e unicast. Nao representa o MAC real.
+    bytes[0] = (bytes[0] | 0x02) & 0xFE;
+
+    return bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0').toUpperCase())
+        .join(':');
   }
 }

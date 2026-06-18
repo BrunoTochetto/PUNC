@@ -7,6 +7,7 @@ import './nucleo/temas/appTheme.dart';
 import './source/data/servicos/servico_notificacoes.dart';
 import './source/views/configuracao_usuario_page.dart';
 import './source/views/cronograma.dart';
+import './source/views/debug_notificacoes_page.dart';
 import './source/views/gerenciamento.dart';
 import './source/views/gerenciamento2.dart';
 import './source/views/localizacao_atual_page.dart';
@@ -33,6 +34,7 @@ Future<void> main() async {
         '/gerenciamento/novo': (_) => const Gerenciamento2Page(),
         '/perfil': (_) => const PerfilPage(),
         '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
+        '/debug-notificacoes': (_) => const DebugNotificacoesPage(),
       },
     ),
   );

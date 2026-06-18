@@ -2,7 +2,9 @@ import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from 'node:url';
+
+dotenv.config({ path: fileURLToPath(new URL('./.env', import.meta.url)) });
 import { logInfo } from './src/services/logErrors.js';
 import { initFirebase } from './src/services/firebase.js';
 
@@ -33,7 +35,7 @@ app.get('/status', (req, res) => {
 });
 
 
-const PORT = process.env.PORT || 1000;
+const PORT = process.env.PORT || 1025; // Desculpa Heitor, não sabia que não podia 1000
 app.listen(PORT, () => {
     // console.log(`Server rodando na porta: ${PORT}`);
     logInfo(`Server rodando na porta: ${PORT}`);

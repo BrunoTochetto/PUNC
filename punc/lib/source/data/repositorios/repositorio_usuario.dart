@@ -13,6 +13,7 @@ class RepositorioUsuario {
     required String mac,
     required double latitude,
     required double longitude,
+    String? fcmToken,
   }) async {
     final resposta = await _client.post(
       '/api/usuario/cadastro',
@@ -21,6 +22,8 @@ class RepositorioUsuario {
         'mac': mac,
         'latitude': latitude,
         'longitude': longitude,
+        if (fcmToken != null && fcmToken.trim().isNotEmpty)
+          'fcm_token': fcmToken.trim(),
       },
     );
 

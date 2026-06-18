@@ -11,7 +11,7 @@ import { notificacoes } from '../services/notificacoes.js';
 */
 async function cadastro(req, res) {
 	try {
-		const { nome_dispositivo, mac, latitude, longitude } = req.body;
+		const { nome_dispositivo, mac, latitude, longitude, fcm_token } = req.body;
 
 		if (!nome_dispositivo || !mac || latitude === undefined || longitude === undefined) {
 			await logAviso('Cadastro de usuário: dados incompletos recebidos: ' + `nome dispostivo: ${nome_dispositivo}, mac: ${mac}, latitude e longitude: ${latitude, longitude}`, null);
@@ -38,16 +38,43 @@ async function cadastro(req, res) {
 
 		// Verificar se usuário com mesma MAC já existe
 		const verificacao = await querry(
-			'SELECT id FROM usuarios WHERE mac = $1',
+			'SELECT id, id_celula, id_regiao FROM usuarios WHERE mac = $1',
 			[macAddress.padrao]
 		);
 
 		if (verificacao.rows.length > 0) {
-			await logAviso(
-				`Cadastro: duplicação de MAC - ${macAddress.padrao} --- Possível tentativa de alterar a localização.`,
-				null
+			const usuario = verificacao.rows[0];
+			const queryCelulaExistente = `
+				SELECT cell_x, cell_y FROM celulas WHERE id = $1
+			`;
+			const resultadoCelulaExistente = await querry(queryCelulaExistente, [usuario.id_celula]);
+			const celulaExistente = resultadoCelulaExistente.rows[0] || { cell_x: null, cell_y: null };
+			const topicoExistente =
+				celulaExistente.cell_x != null && celulaExistente.cell_y != null
+					? notificacoes.celulaParaTopico(celulaExistente.cell_x, celulaExistente.cell_y)
+					: null;
+			const inscricaoFcmExistente = topicoExistente
+				? await notificacoes.inscreverTokenNoTopico(fcm_token, topicoExistente)
+				: null;
+
+			await logInfo(
+				`Usuário já cadastrado: ID=${usuario.id}, MAC=${macAddress.padrao}, Tópico=${topicoExistente ?? 'indisponível'}, Inscrição FCM=${inscricaoFcmExistente?.inscrito ?? false}`
 			);
-			return res.status(409).json({ erro: 'Usuário com este MAC já existe' });
+
+			return res.status(200).json({
+				mensagem: 'Usuário já cadastrado. Inscrição FCM processada.',
+				usuario: {
+					id: usuario.id,
+					id_celula: usuario.id_celula,
+					id_regiao: usuario.id_regiao,
+					celula: {
+						x: celulaExistente.cell_x,
+						y: celulaExistente.cell_y,
+						topico: topicoExistente,
+					},
+					inscricao_fcm: inscricaoFcmExistente,
+				}
+			});
 		}
 		//////////////
 
@@ -79,6 +106,7 @@ async function cadastro(req, res) {
 		const celula = resultadoCelula.rows[0] || { cell_x: null, cell_y: null };
 
 		let topicoCelula = null;
+		let inscricaoFcm = null;
 		if (celula.cell_x != null && celula.cell_y != null) {
 			try {
 				const resultadoTopico = await notificacoes.criarTopicoCelula(celula.cell_x, celula.cell_y);
@@ -90,10 +118,12 @@ async function cadastro(req, res) {
 					err
 				);
 			}
+
+			inscricaoFcm = await notificacoes.inscreverTokenNoTopico(fcm_token, topicoCelula);
 		}
 		
 		await logInfo(
-			`Usuário cadastrado: ID=${usuario.id}, MAC=${macAddress.padrao}, Device=${nome_dispositivo}, Célula(${celula.cell_x}, ${celula.cell_y}), Tópico=${topicoCelula ?? 'indisponível'}`
+			`Usuário cadastrado: ID=${usuario.id}, MAC=${macAddress.padrao}, Device=${nome_dispositivo}, Célula(${celula.cell_x}, ${celula.cell_y}), Tópico=${topicoCelula ?? 'indisponível'}, Inscrição FCM=${inscricaoFcm?.inscrito ?? false}`
 		);
 
 		res.status(201).json({
@@ -106,7 +136,8 @@ async function cadastro(req, res) {
 					x: celula.cell_x,
 					y: celula.cell_y,
 					topico: topicoCelula,
-				}
+				},
+				inscricao_fcm: inscricaoFcm,
 			}
 		});
 
