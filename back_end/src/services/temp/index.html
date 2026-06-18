@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    fieldset {
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid #ccc;
+    }
+
+    legend {
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+
+    #messages {
+      height: 340px;
+      border: 1px solid #ccc;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #fafafa;
+    }
+
+    .message {
+      margin: 5px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message strong {
+      color: #333;
+    }
+
+    #status {
+      margin-bottom: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Test Client</h1>
+  <div id="status">Conectando ao servidor...</div>
+  <div id="messages"></div>
+
+  <fieldset>
+    <legend>Registrar</legend>
+    <label>
+      Tipo de conexão:
+      <select id="roleSelect">
+        <option value="driver">Motorista</option>
+        <option value="user">Usuário</option>
+      </select>
+    </label>
+    <label>
+      ID (opcional):
+      <input type="text" id="clientId" placeholder="Ex: 123 para motorista ou user456 para usuário" />
+    </label>
+    <label>
+      CEP:
+      <input type="text" id="clientCep" placeholder="Ex: 12345-678" />
+    </label>
+    <button onclick="registerClient()">Registrar</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Atualização de localização (motorista)</legend>
+    <label>
+      Latitude:
+      <input type="number" id="latitude" step="0.000001" placeholder="-23.55052" />
+    </label>
+    <label>
+      Longitude:
+      <input type="number" id="longitude" step="0.000001" placeholder="-46.633308" />
+    </label>
+    <button onclick="sendLocationUpdate()">Enviar localização</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Enviar mensagem livre</legend>
+    <label>
+      JSON de teste:
+      <input type="text" id="messageInput" placeholder='{"action":"ping"}' />
+    </label>
+    <button onclick="sendRawMessage()">Enviar mensagem</button>
+  </fieldset>
+
+  <script>
+    const status = document.getElementById('status');
+    const messages = document.getElementById('messages');
+    const roleSelect = document.getElementById('roleSelect');
+    const clientIdInput = document.getElementById('clientId');
+    const clientCepInput = document.getElementById('clientCep');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const messageInput = document.getElementById('messageInput');
+
+    const ws = new WebSocket('ws://localhost:8080');
+
+    function appendMessage(label, content) {
+      const message = document.createElement('div');
+      message.className = 'message';
+      message.innerHTML = `<strong>${label}:</strong> ${content}`;
+      messages.appendChild(message);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function safeJson(value) {
+      try {
+        return JSON.stringify(JSON.parse(value), null, 2);
+      } catch {
+        return value;
+      }
+    }
+
+    ws.onopen = () => {
+      status.textContent = 'Conectado ao servidor';
+      status.style.color = 'green';
+      appendMessage('Status', 'Conexão aberta. Registre-se como driver ou user.');
+    };
+
+    ws.onmessage = (event) => {
+      appendMessage('Servidor', safeJson(event.data));
+    };
+
+    ws.onerror = (error) => {
+      status.textContent = 'Erro de conexão';
+      status.style.color = 'red';
+      appendMessage('Erro', error.message || JSON.stringify(error));
+    };
+
+    ws.onclose = () => {
+      status.textContent = 'Desconectado do servidor';
+      status.style.color = 'red';
+      appendMessage('Status', 'Conexão fechada. Recarregue a página para reconectar.');
+    };
+
+    function registerClient() {
+      const payload = {
+        action: 'register',
+        role: roleSelect.value,
+      };
+      const clientId = clientIdInput.value.trim();
+      const clientCep = clientCepInput.value.trim();
+
+      if (!clientCep) {
+        appendMessage('Aviso', 'CEP é obrigatório para registro.');
+        return;
+      }
+
+      if (clientId) {
+        payload.id = clientId;
+      }
+      payload.cep = clientCep;
+
+      ws.send(JSON.stringify(payload));
+      appendMessage('Enviado', safeJson(JSON.stringify(payload)));
+    }
+
+    function sendLocationUpdate() {
+      const latitude = Number(latitudeInput.value);
+      const longitude = Number(longitudeInput.value);
+
+      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+        appendMessage('Aviso', 'Latitude e longitude devem ser números válidos.');
+        return;
+      }
+
+      const payload = {
+        action: 'locationUpdate',
+        location: {
+          latitude,
+          longitude,
+        },
+      };
+      ws.send(JSON.stringify(payload));
+      appendMessage('Enviado', safeJson(JSON.stringify(payload)));
+    }
+
+    function sendRawMessage() {
+      const raw = messageInput.value.trim();
+      if (!raw) {
+        appendMessage('Aviso', 'Digite um JSON válido antes de enviar.');
+        return;
+      }
+      try {
+        const payload = JSON.parse(raw);
+        ws.send(JSON.stringify(payload));
+        appendMessage('Enviado', safeJson(JSON.stringify(payload)));
+      } catch (error) {
+        appendMessage('Erro', 'JSON inválido: ' + error.message);
+      }
+    }
+
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendRawMessage();
+      }
+    });
+  </script>
+</body>
+</html>

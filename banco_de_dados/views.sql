@@ -148,7 +148,7 @@ GROUP BY
 
 
 -- =========================================================
--- 5) View: vw_usuarios_em_regiao — uma linha por usuário na região
+-- 5) Uma linha por usuário na região
 -- =========================================================
 CREATE OR REPLACE VIEW vw_usuarios_em_regiao AS
 SELECT
@@ -162,3 +162,42 @@ SELECT
 FROM regioes r
 LEFT JOIN usuarios u
     ON u.id_regiao = r.id;
+
+
+-- =========================================================
+-- 6) Todas as áreas de atuação de um gerente
+-- =========================================================
+CREATE OR REPLACE VIEW vw_areas_de_atuacao_de_gerentes AS
+SELECT
+    g.id AS id_gerente,
+    g.nome_usuario AS nome_gerente,
+    g.email,
+    a.id AS id_area_atuacao,
+    a.cep
+FROM gerentes g
+LEFT JOIN area_de_atuacao a
+    ON a.id_gerente = g.id;
+
+
+-- =========================================================
+-- 7) Horários de coleta com gerente e área (CEP)
+-- =========================================================
+CREATE OR REPLACE VIEW vw_horarios_coleta AS
+SELECT
+    hc.id AS id_horario,
+    hc.horario_estimado,
+    hc.dia_semana,
+    hc.data_criacao,
+    hc.tipo_lixo,
+    hc.comentarios,
+    hc.ativo,
+    g.id AS id_gerente,
+    g.nome_usuario AS nome_gerente,
+    g.email AS email_gerente,
+    a.id AS id_area_atuacao,
+    a.cep
+FROM horarios_coleta hc
+JOIN gerentes g
+    ON g.id = hc.id_gerente
+LEFT JOIN area_de_atuacao a
+    ON a.id = hc.id_area_atuacao;
