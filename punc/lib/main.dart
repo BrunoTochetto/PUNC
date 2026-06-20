@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-
 import 'firebase_options.dart';
 import './nucleo/temas/appTheme.dart';
 import './source/data/servicos/servico_notificacoes.dart';
@@ -13,7 +12,6 @@ import './source/views/gerenciamento2.dart';
 import './source/views/localizacao_atual_page.dart';
 import './source/views/mapa_grupos_page.dart';
 import './source/views/pagina_entrada.dart';
-import './source/views/perfil.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +30,6 @@ Future<void> main() async {
         '/localizacao': (_) => const LocalizacaoAtualPage(),
         '/gerenciamento': (_) => const GerenciamentoPage(),
         '/gerenciamento/novo': (_) => const Gerenciamento2Page(),
-        '/perfil': (_) => const PerfilPage(),
         '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
         '/debug-notificacoes': (_) => const DebugNotificacoesPage(),
       },

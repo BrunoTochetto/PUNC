@@ -32,71 +32,18 @@ class PuncAppShell extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            tooltip: 'Notificacoes',
+            tooltip: 'Notificações',
             icon: const Icon(Icons.notifications_none, color: corIconeAppBar),
             onPressed: () => Navigator.pushNamed(context, '/debug-notificacoes'),
           ),
-          IconButton(
-            tooltip: 'Configuracoes',
-            icon: const Icon(Icons.settings_outlined, color: corIconeAppBar),
-            onPressed: () => Navigator.pushNamed(context, '/configuracoes'),
-          ),
-          Builder(
-            builder: (context) {
-              return IconButton(
-                tooltip: 'Menu',
-                icon: const Icon(Icons.menu, color: corIconeAppBar),
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-              );
-            },
-          ),
           const SizedBox(width: 8),
         ],
-      ),
-      endDrawer: Drawer(
-        backgroundColor: Colors.white,
-        child: SafeArea(
-          child: ListView(
-            children: [
-              _MenuItem(
-                route: '/mapa',
-                selectedRoute: selectedRoute,
-                icon: Icons.map_outlined,
-                label: 'Mapa',
-              ),
-              _MenuItem(
-                route: '/cronograma',
-                selectedRoute: selectedRoute,
-                icon: Icons.calendar_today_outlined,
-                label: 'Cronograma',
-              ),
-              _MenuItem(
-                route: '/gerenciamento',
-                selectedRoute: selectedRoute,
-                icon: Icons.local_shipping_outlined,
-                label: 'Gerenciamento',
-              ),
-              _MenuItem(
-                route: '/perfil',
-                selectedRoute: selectedRoute,
-                icon: Icons.person_outline,
-                label: 'Perfil',
-              ),
-              _MenuItem(
-                route: '/debug-notificacoes',
-                selectedRoute: selectedRoute,
-                icon: Icons.bug_report_outlined,
-                label: 'Debug notificacoes',
-              ),
-            ],
-          ),
-        ),
       ),
       floatingActionButton: floatingActionButton,
       body: Column(
         children: [
           Expanded(child: body),
-          // Barra Inferior (Simulando a BottomNavigationBar do design)
+          // Barra Inferior com Navegação Funcional
           Container(
             height: 72,
             decoration: const BoxDecoration(
@@ -108,10 +55,34 @@ class PuncAppShell extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildBottomNavItem(Icons.map_outlined, 'Mapa', selectedRoute == '/mapa'),
-                _buildBottomNavItem(Icons.groups_outlined, 'Grupos', selectedRoute == '/grupos'),
-                _buildBottomNavItem(Icons.calendar_today, 'Cronograma', selectedRoute == '/cronograma'),
-                _buildBottomNavItem(Icons.person_outline, 'Perfil', selectedRoute == '/perfil'),
+                _buildBottomNavItem(
+                  context,
+                  Icons.map_outlined,
+                  'Mapa',
+                  selectedRoute == '/mapa',
+                  '/mapa',
+                ),
+                _buildBottomNavItem(
+                  context,
+                  Icons.calendar_today,
+                  'Cronograma',
+                  selectedRoute == '/cronograma',
+                  '/cronograma',
+                ),
+                _buildBottomNavItem(
+                  context,
+                  Icons.local_shipping_outlined,
+                  'Gerenciamento',
+                  selectedRoute == '/gerenciamento',
+                  '/gerenciamento',
+                ),
+                _buildBottomNavItem(
+                  context,
+                  Icons.settings_outlined,
+                  'Configurações',
+                  selectedRoute == '/configuracoes',
+                  '/configuracoes',
+                ),
               ],
             ),
           ),
@@ -120,58 +91,34 @@ class PuncAppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: isSelected ? Colors.white : Colors.white60, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white60,
-            fontSize: 10,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MenuItem extends StatelessWidget {
-  const _MenuItem({
-    required this.route,
-    required this.selectedRoute,
-    required this.icon,
-    required this.label,
-  });
-
-  final String route;
-  final String? selectedRoute;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isSelected = selectedRoute == route;
-    return ListTile(
-      selected: isSelected,
-      selectedTileColor: const Color(0xFFD3E4D8),
-      leading: Icon(icon, color: isSelected ? const Color(0xFF5E996E) : Colors.grey),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? const Color(0xFF2C2C2C) : Colors.grey[700],
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
+  Widget _buildBottomNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    bool isSelected,
+    String route,
+  ) {
+    return GestureDetector(
       onTap: () {
-        Navigator.pop(context);
         if (selectedRoute != route) {
           Navigator.pushReplacementNamed(context, route);
         }
       },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: isSelected ? Colors.white : Colors.white60, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white60,
+              fontSize: 10,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

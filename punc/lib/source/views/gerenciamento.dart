@@ -37,9 +37,11 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
   }
 
   void _carregar() {
-    _motoristasFuture = _viewModel.carregarMotoristas(
-      idGerente: _idGerentePadrao,
-    );
+    setState(() {
+      _motoristasFuture = _viewModel.carregarMotoristas(
+        idGerente: _idGerentePadrao,
+      );
+    });
   }
 
   Future<void> _excluir(MotoristaGerente motorista) async {
@@ -104,7 +106,15 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/gerenciamento/novo'),
+                onPressed: () async {
+                  final resultado = await Navigator.pushNamed(
+                    context,
+                    '/gerenciamento/novo',
+                  );
+                  if (resultado == true && mounted) {
+                    _carregar();
+                  }
+                },
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Adicionar motorista/caminhão'),
                 style: ElevatedButton.styleFrom(

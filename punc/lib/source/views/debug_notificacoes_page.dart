@@ -24,7 +24,7 @@ class DebugNotificacoesPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Depuracao de notificacoes'),
+        title: const Text('Depuração de notificações'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -36,11 +36,11 @@ class DebugNotificacoesPage extends StatelessWidget {
               'Topico inscrito no front': resultadoAtual.inscricao.topico,
               'Inscricao Firebase': resultadoAtual.inscricao.inscrito
                   ? 'Solicitada com sucesso'
-                  : 'Nao inscrita',
+                  : 'Não inscrita',
               'Erro inscricao Firebase':
                   resultadoAtual.erroInscricao ?? 'Nenhum erro capturado',
               'Inscricao backend':
-                  inscricaoBackend?.inscrito == true ? 'Sim' : 'Nao',
+                  inscricaoBackend?.inscrito == true ? 'Sim' : 'Não',
               'Motivo backend':
                   inscricaoBackend?.motivo ?? 'Nenhum motivo informado',
               'Erro backend': inscricaoBackend?.erro ?? 'Nenhum erro capturado',
@@ -51,13 +51,13 @@ class DebugNotificacoesPage extends StatelessWidget {
             titulo: 'Usuario',
             itens: {
               'ID usuario': usuario.id.toString(),
-              'ID celula': usuario.idCelula?.toString() ?? 'null',
+              'ID célula': usuario.idCelula?.toString() ?? 'null',
               'ID regiao': usuario.idRegiao?.toString() ?? 'null',
             },
           ),
           const SizedBox(height: 16),
           _SecaoDebug(
-            titulo: 'Celula e topico',
+            titulo: 'Celula e tópico',
             itens: {
               'Celula X': celula.x?.toString() ?? 'null',
               'Celula Y': celula.y?.toString() ?? 'null',
@@ -112,7 +112,7 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Depuracao de notificacoes'),
+        title: const Text('Depuração de notificações'),
       ),
       body: FutureBuilder<PreferenciasUsuario>(
         future: _preferenciasFuture,
@@ -151,9 +151,9 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
                 titulo: 'Preferencias locais',
                 itens: {
                   'Usuario configurado':
-                      preferencias?.configurado == true ? 'Sim' : 'Nao',
+                      preferencias?.configurado == true ? 'Sim' : 'Não',
                   'Topico salvo':
-                      preferencias?.topicoFcm ?? 'Nenhum topico salvo',
+                      preferencias?.topicoFcm ?? 'Nenhum tópico salvo',
                   'ID/MAC salvo':
                       preferencias?.idDispositivo ?? 'Nenhum ID salvo',
                 },
@@ -163,9 +163,9 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
                 titulo: 'Como usar',
                 itens: {
                   'Modo atual':
-                      'Esta tela foi aberta pelo menu, entao mostra dados salvos no aparelho.',
+                      'Então mostra dados salvos no aparelho.',
                   'Cadastro completo':
-                      'Para ver ID do usuario, celula X/Y e topico do backend, refaca o primeiro cadastro pelo botao de localizacao.',
+                      'Para ver ID do usuário, célula X/Y e tópico do backend, refaça o primeiro cadastro pelo botão de localização.',
                 },
               ),
               const SizedBox(height: 24),
@@ -174,7 +174,7 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
                   context,
                   '/localizacao',
                 ),
-                child: const Text('Refazer cadastro de localizacao'),
+                child: const Text('Refazer cadastro de localização'),
               ),
               const SizedBox(height: 12),
               OutlinedButton(

@@ -44,7 +44,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Nao foi possivel configurar as notificacoes.'),
+          content: const Text('Não foi possível configurar as notificações.'),
           action: SnackBarAction(
             label: 'Debug',
             onPressed: () => Navigator.pushNamed(
@@ -71,7 +71,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
 
           if (snapshot.hasError) {
             return EstadoErro(
-              mensagem: 'Nao foi possivel obter sua localizacao atual.',
+              mensagem: 'Não foi possível obter sua localização atual.',
               onTentarNovamente: () => setState(_carregar),
             );
           }
@@ -79,7 +79,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
           final localizacao = snapshot.data;
           if (localizacao == null) {
             return const EstadoVazio(
-              mensagem: 'Nenhuma localizacao encontrada.',
+              mensagem: 'Nenhuma localização encontrada.',
             );
           }
 
@@ -104,7 +104,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Confirme sua localizacao para receber notificacoes da coleta na sua regiao.',
+                  'Confirme sua localização para receber notificações da coleta na sua região.',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -127,7 +127,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                           width: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Confirmar e receber notificacoes'),
+                      : const Text('Confirmar e receber notificações'),
                 ),
                 TextButton(
                   onPressed: _salvando
@@ -143,7 +143,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                             '/debug-notificacoes',
                           ),
                   icon: const Icon(Icons.bug_report_outlined),
-                  label: const Text('Abrir debug de notificacoes'),
+                  label: const Text('Abrir depuração de notificações'),
                 ),
               ],
             ),

@@ -38,7 +38,7 @@ class _MapaGruposPageState extends State<MapaGruposPage> {
 
           if (snapshot.hasError) {
             return EstadoErro(
-              mensagem: 'Nao foi possivel carregar os caminhoes no mapa.',
+              mensagem: 'Não foi possível carregar os caminhões no mapa.',
               onTentarNovamente: () => setState(_carregar),
             );
           }
@@ -46,7 +46,7 @@ class _MapaGruposPageState extends State<MapaGruposPage> {
           final trajetos = snapshot.data ?? [];
           if (trajetos.isEmpty) {
             return const EstadoVazio(
-              mensagem: 'Nenhum caminhao em percurso neste momento.',
+              mensagem: 'Nenhum caminhão em percurso neste momento.',
             );
           }
 
@@ -83,10 +83,10 @@ class _MapaConteudo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Caminhao a caminho',
+                    'Caminhão a caminho',
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  Text('Caminhoes em rota: ${trajetos.length}'),
+                  Text('Caminhões em rota: ${trajetos.length}'),
                 ],
               ),
             ),
@@ -99,7 +99,7 @@ class _MapaConteudo extends StatelessWidget {
             top: 150 + (index * 34) % 180,
             left: 70 + (index * 58) % 220,
             child: Tooltip(
-              message: trajeto.identificacaoCaminhao ?? 'Caminhao em rota',
+              message: trajeto.identificacaoCaminhao ?? 'Caminhão em rota',
               child: const Icon(
                 Icons.location_on,
                 color: Color(0xFFE03B3B),

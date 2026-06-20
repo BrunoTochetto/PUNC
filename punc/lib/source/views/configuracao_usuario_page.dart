@@ -5,7 +5,6 @@ import '../viewmodels/perfil_view_model.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
 import '../widgets/section_header.dart';
-import '../widgets/setting_dropdown.dart';
 import '../widgets/setting_switch.dart';
 import '../widgets/setting_text_field.dart';
 
@@ -96,22 +95,65 @@ class _ConfiguracaoConteudo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Configurações do usuário',
+                  'Seu Perfil',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 22,
                     color: corTextoEscuro,
                   ),
                 ),
-                Text(
-                  'Gerencie suas preferências e informações da conta.',
-                  style: TextStyle(
-                    color: corTextoEscuro.withOpacity(0.7),
-                    fontSize: 14,
+                const SizedBox(height: 20),
+                Center(
+                  child: CircleAvatar(
+                    radius: 46,
+                    backgroundColor: Colors.white,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFE0E0E0), width: 2),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.person,
+                          size: 54,
+                          color: corBotao.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 34),
+
+                // Bloco de Informações Pessoais
+                _buildContainer(
+                  context,
+                  child: Column(
+                    children: [
+                      const SectionHeader(
+                        icon: Icons.person_outline,
+                        title: 'Informações pessoais',
+                      ),
+                      SettingTextField(
+                        label: 'Nome',
+                        initialValue: '',
+                        suffixIcon: Icons.person_outline,
+                      ),
+                      SettingTextField(
+                        label: 'Email',
+                        initialValue: '',
+                        suffixIcon: Icons.mail_outline,
+                      ),
+                      SettingTextField(
+                        label: 'Telefone',
+                        initialValue: '',
+                        suffixIcon: Icons.phone_android,
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 22),
-                
+
                 // Bloco de Notificações
                 _buildContainer(
                   context,
@@ -121,20 +163,20 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                         icon: Icons.notifications_none,
                         title: 'Notificações',
                       ),
-                      const SettingSwitch(
+                      SettingSwitch(
                         title: 'Receber notificações.',
                         value: true,
-                        onChanged: null,
+                        onChanged: (value) {},
                       ),
-                      const SettingSwitch(
+                      SettingSwitch(
                         title: 'Notificações das rotas.',
                         value: true,
-                        onChanged: null,
+                        onChanged: (value) {},
                       ),
-                      const SettingSwitch(
+                      SettingSwitch(
                         title: 'Notificações de atualizações de status.',
                         value: true,
-                        onChanged: null,
+                        onChanged: (value) {},
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -145,109 +187,34 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                             '/debug-notificacoes',
                           ),
                           icon: const Icon(Icons.bug_report_outlined),
-                          label: const Text('Abrir debug de notificacoes'),
+                          label: const Text('Abrir depuração de notificações'),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 22),
-                
-                // Bloco de Identificação
+
+                // Bloco de Identificação Adicional
                 _buildContainer(
                   context,
                   child: Column(
                     children: [
                       const SectionHeader(
-                        icon: Icons.person_outline,
-                        title: 'Identificação de usuário',
-                      ),
-                      SettingTextField(
-                        label: 'Email',
-                        initialValue: perfil.email,
-                        suffixIcon: Icons.mail_outline,
-                      ),
-                      SettingTextField(
-                        label: 'Telefone',
-                        initialValue: perfil.telefone,
-                        suffixIcon: Icons.phone_android,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 22),
-                
-                // Bloco de Preferências
-                _buildContainer(
-                  context,
-                  child: Column(
-                    children: [
-                      const SectionHeader(
-                        icon: Icons.edit_note,
-                        title: 'Preferências',
+                        icon: Icons.settings_outlined,
+                        title: 'Configurações adicionais',
                       ),
                       SettingSwitch(
-                        title: 'Modo escuro',
-                        value: perfil.modoEscuro,
-                        onChanged: null,
-                      ),
-                      SettingDropdown(
-                        label: 'Idioma',
-                        value: perfil.idioma,
+                        title: 'Notificação por email',
+                        value: true,
+                        onChanged: (value) {},
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-        
-        // Rodapé com Botões - Branco Puro e Borda
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: corBordaCinza)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: corBordaCinza),
-                    foregroundColor: corTextoEscuro,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text('Cancelar'),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: corBotao,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text('Salvar Alterações', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
           ),
         ),
       ],

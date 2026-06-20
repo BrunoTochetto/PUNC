@@ -7,8 +7,6 @@ class PerfilViewModel {
       nome: 'Nicoly Quechini',
       email: 'nicolyquechini6@gmail.com',
       telefone: '(49) 93485934869',
-      modoEscuro: false,
-      idioma: 'Portugues',
       notificacaoEmail: true,
     );
   }

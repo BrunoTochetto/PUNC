@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SettingTextField extends StatelessWidget {
+class SettingTextField extends StatefulWidget {
   final String label;
   final String initialValue;
   final IconData? suffixIcon;
@@ -13,6 +13,25 @@ class SettingTextField extends StatelessWidget {
   });
 
   @override
+  State<SettingTextField> createState() => _SettingTextFieldState();
+}
+
+class _SettingTextFieldState extends State<SettingTextField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -21,30 +40,35 @@ class SettingTextField extends StatelessWidget {
           SizedBox(
             width: 80,
             child: Text(
-              label,
+              widget.label,
               style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
             ),
           ),
           Expanded(
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(4),
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Digite ${widget.label.toLowerCase()}',
+                filled: true,
+                fillColor: Colors.grey[50],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF5E996E), width: 2),
+                ),
+                suffixIcon: widget.suffixIcon != null
+                    ? Icon(widget.suffixIcon, size: 18, color: Colors.grey)
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    initialValue,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  if (suffixIcon != null)
-                    Icon(suffixIcon, size: 16, color: Colors.grey),
-                ],
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
           ),
         ],

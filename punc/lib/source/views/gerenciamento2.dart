@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_header.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/truck_card.dart';
+import '../data/modelos/gerente.dart';
+import '../domain/casodeuso/gerente/cadastrar_motorista.dart';
+import '../widgets/punc_app_shell.dart';
+import '../widgets/section_header.dart';
 
 class Gerenciamento2Page extends StatefulWidget {
   const Gerenciamento2Page({super.key});
@@ -11,189 +12,303 @@ class Gerenciamento2Page extends StatefulWidget {
 }
 
 class _Gerenciamento2PageState extends State<Gerenciamento2Page> {
-  String selectedStatus = 'Disponível';
+  static const int _idGerentePadrao = 1;
+
+  final _nomeController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _numeroController = TextEditingController();
+  final _placaController = TextEditingController();
+  final _modeloController = TextEditingController();
+  final _casodeUso = CadastrarMotorista();
+
+  String _selectedStatus = 'Disponível';
+  bool _salvando = false;
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _telefoneController.dispose();
+    _numeroController.dispose();
+    _placaController.dispose();
+    _modeloController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _salvar() async {
+    if (_nomeController.text.trim().isEmpty ||
+        _numeroController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha os campos obrigatórios.')),
+      );
+      return;
+    }
+
+    setState(() => _salvando = true);
+    try {
+      await _casodeUso.executar(
+        idGerente: _idGerentePadrao,
+        nomeDispositivo: _nomeController.text.trim(),
+        mac: _numeroController.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Motorista/caminhão salvo com sucesso!')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: SafeArea(
-        top: false,
+    const Color corFundoPagina = Color(0xFFD3E4D8);
+    const Color corBotaoPrimario = Color(0xFF5E996E);
+    const Color corTextoEscuro = Color(0xFF2C2C2C);
+    const Color corBordaCinza = Color(0xFFE0E0E0);
+
+    return PuncAppShell(
+      selectedRoute: '/gerenciamento/novo',
+      body: Container(
+        color: corFundoPagina,
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomHeader(),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
+              Text(
+                'Adicionar motorista/caminhão',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  color: corTextoEscuro,
                 ),
+              ),
+              Text(
+                'Preencha os dados para adicionar um novo veículo.',
+                style: TextStyle(
+                  color: corTextoEscuro.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // Bloco de Informações do Motorista
+              _buildContainer(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Novo motorista / caminhão',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87, // Fixed typo blackDE
-                      ),
+                    const SectionHeader(
+                      icon: Icons.person_outline,
+                      title: 'Informações do motorista',
                     ),
-                    const Text(
-                      'Motoristas e Caminhões',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                      ),
+                    _buildTextField(
+                      controller: _nomeController,
+                      label: 'Nome do motorista',
+                      icon: Icons.person_outline,
                     ),
-                    const SizedBox(height: 30),
-                    
-                    // Form Grid
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Nome do motorista',
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Telefone',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Número do caminhão',
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Placa do caminhão',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            label: 'Modelo do caminhão',
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Status',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Container(
-                                height: 45,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(25),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: selectedStatus,
-                                    isExpanded: true,
-                                    icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                                    onChanged: (String? newValue) {
-                                      if (newValue != null) {
-                                        setState(() {
-                                          selectedStatus = newValue;
-                                        });
-                                      }
-                                    },
-                                    items: <String>['Disponível', 'Em rota', 'Manutenção']
-                                        .map<DropdownMenuItem<String>>((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 35),
-                    
-                    // Save Button
-                    Center(
-                      child: SizedBox(
-                        width: 150,
-                        height: 45,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A6767),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 2,
-                          ),
-                          child: const Text(
-                            'Salvar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 40),
-                    
-                    // Preview Card
-                    TruckCard(
-                      title: 'Caminhão 01',
-                      driver: 'Nicoly Quechini',
-                      phone: '(49) 99914-2387',
-                      truckNumber: '01',
-                      plate: 'BTS-525',
-                      model: 'Mercedsfvj',
-                      route: 'Centro, 30 de Outubro',
-                      status: 'Em rota',
+                    _buildTextField(
+                      controller: _telefoneController,
+                      label: 'Telefone',
+                      icon: Icons.phone_android,
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(height: 22),
+
+              // Bloco de Informações do Caminhão
+              _buildContainer(
+                child: Column(
+                  children: [
+                    const SectionHeader(
+                      icon: Icons.local_shipping_outlined,
+                      title: 'Informações do caminhão',
+                    ),
+                    _buildTextField(
+                      controller: _numeroController,
+                      label: 'Número/ID do caminhão',
+                      icon: Icons.tag_outlined,
+                    ),
+                    _buildTextField(
+                      controller: _placaController,
+                      label: 'Placa do caminhão',
+                      icon: Icons.credit_card_outlined,
+                    ),
+                    _buildTextField(
+                      controller: _modeloController,
+                      label: 'Modelo do caminhão',
+                      icon: Icons.directions_car_outlined,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildStatusDropdown(corBotaoPrimario),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Botões de Ação
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _salvando
+                          ? null
+                          : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: corBordaCinza),
+                        foregroundColor: corTextoEscuro,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _salvando ? null : _salvar,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: corBotaoPrimario,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: _salvando
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
+                              ),
+                            )
+                          : const Text('Salvar',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        controller: controller,
+        enabled: !_salvando,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, color: const Color(0xFF5E996E)),
+          filled: true,
+          fillColor: Colors.grey[50],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide:
+                const BorderSide(color: Color(0xFF5E996E), width: 2),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusDropdown(Color corBotao) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Status',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF555555),
+          ),
+        ),
+        const SizedBox(height: 8),
+        IgnorePointer(
+          ignoring: _salvando,
+          child: DropdownButtonFormField<String>(
+            value: _selectedStatus,
+            isExpanded: true,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: corBotao, width: 2),
+              ),
+            ),
+            items: ['Disponível', 'Em rota', 'Manutenção']
+                .map((status) => DropdownMenuItem(
+                      value: status,
+                      child: Text(status),
+                    ))
+                .toList(),
+            onChanged: _salvando
+                ? null
+                : (value) {
+                    if (value != null) {
+                      setState(() => _selectedStatus = value);
+                    }
+                  },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContainer({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }
