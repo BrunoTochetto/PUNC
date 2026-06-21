@@ -1,7 +1,7 @@
-import { WebSocket, WebSocketServer } from 'ws';
+// import { WebSocket, WebSocketServer } from 'ws';
 import { logInfo, logErro } from './logErrors.js';
-import { registerDriver, updateDriverLocation, removeDriver, endDriverTrajectory } from './websocket/drivers.js';
-import { registerUser, broadcastToUsersByCep } from './websocket/users.js';
+// import { registerDriver, updateDriverLocation, removeDriver, endDriverTrajectory } from './websocket/drivers.js';
+// import { registerUser, broadcastToUsersByCep } from './websocket/users.js';
 
 const wsPort = process.env.WS_PORT ? Number(process.env.WS_PORT) : 8080;
 const wss = new WebSocketServer({ port: wsPort });
