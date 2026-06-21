@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:punc/nucleo/temas/appCores.dart';
-import '../widgets/item_etapa_cronograma.dart';
 import '../widgets/card_resumo_cronograma.dart';
 import '../widgets/seletor_tipo_coleta.dart';
 import '../widgets/seletor_dias_semana.dart';

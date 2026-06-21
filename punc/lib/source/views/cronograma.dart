@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:punc/nucleo/temas/appCores.dart';
 import '../data/modelos/horario_coleta.dart';
 import '../viewmodels/cronograma_view_model.dart';
 import '../widgets/card_crono.dart';

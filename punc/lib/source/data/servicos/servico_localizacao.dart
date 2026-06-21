@@ -26,6 +26,23 @@ class ServicoLocalizacao {
     );
   }
 
+  /// Verifica se a permissão de localização está concedida sem solicitar novamente.
+  /// Retorna true se o serviço está habilitado e a permissão foi concedida.
+  Future<bool> verificarPermissao() async {
+    final servicoHabilitado = await Geolocator.isLocationServiceEnabled();
+    if (!servicoHabilitado) {
+      return false;
+    }
+
+    var permissao = await Geolocator.checkPermission();
+    if (permissao == LocationPermission.denied) {
+      permissao = await Geolocator.requestPermission();
+    }
+
+    return permissao == LocationPermission.always ||
+        permissao == LocationPermission.whileInUse;
+  }
+
   Future<bool> _garantirPermissao() async {
     final servicoHabilitado = await Geolocator.isLocationServiceEnabled();
     if (!servicoHabilitado) {

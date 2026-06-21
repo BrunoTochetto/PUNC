@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import './nucleo/temas/appTheme.dart';
 import './source/data/servicos/servico_notificacoes.dart';
+import './source/viewmodels/motorista_view_model.dart';
 import './source/views/configuracao_usuario_page.dart';
 import './source/views/cronograma.dart';
 import './source/views/debug_notificacoes_page.dart';
@@ -11,6 +13,7 @@ import './source/views/gerenciamento.dart';
 import './source/views/gerenciamento2.dart';
 import './source/views/localizacao_atual_page.dart';
 import './source/views/mapa_grupos_page.dart';
+import './source/views/motorista_pagina_exemplo.dart';
 import './source/views/pagina_entrada.dart';
 
 Future<void> main() async {
@@ -19,20 +22,28 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(servicoNotificacoesBackgroundHandler);
 
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: PUNCAppTheme.theme,
-      darkTheme: PUNCAppTheme.darkTheme,
-      home: const PaginaEntrada(),
-      routes: {
-        '/cronograma': (_) => const CronogramaPage(),
-        '/mapa': (_) => const MapaGruposPage(),
-        '/localizacao': (_) => const LocalizacaoAtualPage(),
-        '/gerenciamento': (_) => const GerenciamentoPage(),
-        '/gerenciamento/novo': (_) => const Gerenciamento2Page(),
-        '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
-        '/debug-notificacoes': (_) => const DebugNotificacoesPage(),
-      },
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<MotoristaViewModel>(
+          create: (_) => MotoristaViewModel(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: PUNCAppTheme.theme,
+        darkTheme: PUNCAppTheme.darkTheme,
+        home: const PaginaEntrada(),
+        routes: {
+          '/cronograma': (_) => const CronogramaPage(),
+          '/mapa': (_) => const MapaGruposPage(),
+          '/localizacao': (_) => const LocalizacaoAtualPage(),
+          '/gerenciamento': (_) => const GerenciamentoPage(),
+          '/gerenciamento/novo': (_) => const Gerenciamento2Page(),
+          '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
+          '/debug-notificacoes': (_) => const DebugNotificacoesPage(),
+          '/motorista': (_) => const MotoristaPaginaExemplo(),
+        },
+      ),
     ),
   );
 }

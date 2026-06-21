@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:punc/nucleo/temas/appCores.dart';
-import '../data/modelos/perfil_usuario.dart';
-import '../viewmodels/perfil_view_model.dart';
+import '../data/servicos/servico_preferencias_usuario.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
 import '../widgets/section_header.dart';
 import '../widgets/setting_switch.dart';
-import '../widgets/setting_text_field.dart';
 
 class ConfiguracaoUsuarioPage extends StatefulWidget {
   const ConfiguracaoUsuarioPage({super.key});
@@ -17,8 +14,9 @@ class ConfiguracaoUsuarioPage extends StatefulWidget {
 }
 
 class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
-  final PerfilViewModel _viewModel = PerfilViewModel();
-  late Future<PerfilUsuario?> _perfilFuture;
+  final ServicoPreferenciasUsuario _servicoPreferencias =
+      ServicoPreferenciasUsuario();
+  late Future<PreferenciasUsuario> _preferenciasFuture;
 
   @override
   void initState() {
@@ -27,21 +25,20 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
   }
 
   void _carregar() {
-    _perfilFuture = _viewModel.carregarPerfil();
+    _preferenciasFuture = _servicoPreferencias.carregar();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Identidade Visual: Tons Pastéis, Branco Puro e Bordas Cinzas
-    const Color corFundoPagina = Color(0xFFD3E4D8); // Verde pastel suave do fundo
-    const Color corBotaoPrimario = Color(0xFF5E996E); // Verde folha suave
+    const Color corFundoPagina = Color(0xFFD3E4D8);
+    const Color corBotaoPrimario = Color(0xFF5E996E);
 
     return PuncAppShell(
       selectedRoute: '/configuracoes',
       body: Container(
         color: corFundoPagina,
-        child: FutureBuilder<PerfilUsuario?>(
-          future: _perfilFuture,
+        child: FutureBuilder<PreferenciasUsuario>(
+          future: _preferenciasFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const EstadoCarregando();
@@ -54,15 +51,15 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
               );
             }
 
-            final perfil = snapshot.data;
-            if (perfil == null) {
+            final preferencias = snapshot.data;
+            if (preferencias == null) {
               return const EstadoVazio(
                 mensagem: 'Configurações não encontradas.',
               );
             }
 
             return _ConfiguracaoConteudo(
-              perfil: perfil,
+              preferencias: preferencias,
               corBotao: corBotaoPrimario,
             );
           },
@@ -74,161 +71,132 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
 
 class _ConfiguracaoConteudo extends StatelessWidget {
   const _ConfiguracaoConteudo({
-    required this.perfil,
+    required this.preferencias,
     required this.corBotao,
   });
 
-  final PerfilUsuario perfil;
+  final PreferenciasUsuario preferencias;
   final Color corBotao;
 
   @override
   Widget build(BuildContext context) {
     const Color corTextoEscuro = Color(0xFF2C2C2C);
-    const Color corBordaCinza = Color(0xFFE0E0E0);
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Configurações',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              color: corTextoEscuro,
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // Bloco de Informações do Dispositivo
+          _buildContainer(
+            context,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Seu Perfil',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 22,
-                    color: corTextoEscuro,
-                  ),
+                const SectionHeader(
+                  icon: Icons.devices_outlined,
+                  title: 'Informações do dispositivo',
                 ),
-                const SizedBox(height: 20),
-                Center(
-                  child: CircleAvatar(
-                    radius: 46,
-                    backgroundColor: Colors.white,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFE0E0E0), width: 2),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.person,
-                          size: 54,
-                          color: corBotao.withOpacity(0.5),
-                        ),
-                      ),
+                _buildInfoRow('ID/MAC do dispositivo', preferencias.idDispositivo ?? 'Não configurado'),
+                _buildInfoRow('Tópico FCM', preferencias.topicoFcm ?? 'Não configurado'),
+                _buildInfoRow('Status', preferencias.configurado ? 'Configurado' : 'Não configurado'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          // Bloco de Notificações
+          _buildContainer(
+            context,
+            child: Column(
+              children: [
+                SectionHeader(
+                  icon: Icons.notifications_none,
+                  title: 'Notificações',
+                ),
+                SettingSwitch(
+                  title: 'Receber notificações.',
+                  value: true,
+                  onChanged: (value) {},
+                ),
+                SettingSwitch(
+                  title: 'Notificações das rotas.',
+                  value: true,
+                  onChanged: (value) {},
+                ),
+                SettingSwitch(
+                  title: 'Notificações de atualizações de status.',
+                  value: true,
+                  onChanged: (value) {},
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      '/debug-notificacoes',
                     ),
-                  ),
-                ),
-                const SizedBox(height: 34),
-
-                // Bloco de Informações Pessoais
-                _buildContainer(
-                  context,
-                  child: Column(
-                    children: [
-                      const SectionHeader(
-                        icon: Icons.person_outline,
-                        title: 'Informações pessoais',
-                      ),
-                      SettingTextField(
-                        label: 'Nome',
-                        initialValue: '',
-                        suffixIcon: Icons.person_outline,
-                      ),
-                      SettingTextField(
-                        label: 'Email',
-                        initialValue: '',
-                        suffixIcon: Icons.mail_outline,
-                      ),
-                      SettingTextField(
-                        label: 'Telefone',
-                        initialValue: '',
-                        suffixIcon: Icons.phone_android,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-
-                // Bloco de Notificações
-                _buildContainer(
-                  context,
-                  child: Column(
-                    children: [
-                      SectionHeader(
-                        icon: Icons.notifications_none,
-                        title: 'Notificações',
-                      ),
-                      SettingSwitch(
-                        title: 'Receber notificações.',
-                        value: true,
-                        onChanged: (value) {},
-                      ),
-                      SettingSwitch(
-                        title: 'Notificações das rotas.',
-                        value: true,
-                        onChanged: (value) {},
-                      ),
-                      SettingSwitch(
-                        title: 'Notificações de atualizações de status.',
-                        value: true,
-                        onChanged: (value) {},
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.pushNamed(
-                            context,
-                            '/debug-notificacoes',
-                          ),
-                          icon: const Icon(Icons.bug_report_outlined),
-                          label: const Text('Abrir depuração de notificações'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-
-                // Bloco de Identificação Adicional
-                _buildContainer(
-                  context,
-                  child: Column(
-                    children: [
-                      const SectionHeader(
-                        icon: Icons.settings_outlined,
-                        title: 'Configurações adicionais',
-                      ),
-                      SettingSwitch(
-                        title: 'Notificação por email',
-                        value: true,
-                        onChanged: (value) {},
-                      ),
-                    ],
+                    icon: const Icon(Icons.bug_report_outlined),
+                    label: const Text('Abrir depuração de notificações'),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  // Helper Corrigido: Branco Puro e Borda Cinza
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF555555),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF2C2C2C),
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContainer(BuildContext context, {required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white, // Branco Puro
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)), // Borda Cinza Clara
+        border: Border.all(color: const Color(0xFFE0E0E0)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),

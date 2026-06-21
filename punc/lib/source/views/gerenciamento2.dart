@@ -256,7 +256,7 @@ class _Gerenciamento2PageState extends State<Gerenciamento2Page> {
         IgnorePointer(
           ignoring: _salvando,
           child: DropdownButtonFormField<String>(
-            value: _selectedStatus,
+            initialValue: _selectedStatus,
             isExpanded: true,
             decoration: InputDecoration(
               filled: true,
