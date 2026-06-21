@@ -91,7 +91,7 @@ Lista horários de coleta ativos da região pelo CEP.
 ```dart
 final cronograma = ConsultarCronogramaColeta();
 
-final horarios = await cronograma.executar(cep: '89890000');
+final horarios = await cronograma.executar(cep: '89');
 
 for (final horario in horarios) {
   print('${horario.diaSemana} — ${horario.horarioEstimado} — ${horario.tipoLixo}');
@@ -295,7 +295,7 @@ final todas = await areas.executar(idGerente: sessao.id);
 // Filtrar por prefixo de CEP (opcional)
 final filtradas = await areas.executar(
   idGerente: sessao.id,
-  cep: '89890',
+  cep: '89',
 );
 
 for (final area in todas) {
@@ -314,7 +314,7 @@ final criarArea = CadastrarAreaAtuacao();
 
 final area = await criarArea.executar(
   idGerente: sessao.id,
-  cep: '89890000',
+  cep: '89',
 );
 
 print('Área criada: ID ${area.id} — CEP ${area.cep}');
@@ -431,7 +431,7 @@ Future<void> configurarUsuario() async {
   );
 
   final caminhoes = await mapa.executar();
-  final horarios = await cronograma.executar(cep: '89890000');
+  final horarios = await cronograma.executar(cep: '89');
 
   print('${caminhoes.length} caminhão(ões) em rota');
   print('${horarios.length} horário(s) de coleta');

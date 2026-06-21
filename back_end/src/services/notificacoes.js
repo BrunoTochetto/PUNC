@@ -6,7 +6,7 @@ class Notificacoes {
 	static TOPICO_REGEX = /^[a-zA-Z0-9-_.~%]+$/;
 	static PREFIXO_CELULA = 'celula';
 	static TIPOS_LIXO = {
-		ORGANICO: 'organico',
+		ORGANICO: 'orgânico',
 		RECICLADO: 'reciclado',
 	};
 

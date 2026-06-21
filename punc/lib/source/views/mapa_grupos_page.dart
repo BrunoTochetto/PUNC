@@ -64,10 +64,12 @@ class _MapaConteudo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Stack(
       children: [
         Container(
-          color: const Color(0xFFD9F7E8),
+          color: colorScheme.surface,
           child: const Center(
             child: Icon(Icons.map_outlined, size: 220, color: Colors.white70),
           ),
@@ -100,9 +102,9 @@ class _MapaConteudo extends StatelessWidget {
             left: 70 + (index * 58) % 220,
             child: Tooltip(
               message: trajeto.identificacaoCaminhao ?? 'Caminhão em rota',
-              child: const Icon(
+              child: Icon(
                 Icons.location_on,
-                color: Color(0xFFE03B3B),
+                color: colorScheme.error,
                 size: 34,
               ),
             ),

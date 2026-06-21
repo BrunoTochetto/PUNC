@@ -27,6 +27,8 @@ class _SettingSwitchState extends State<SettingSwitch> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -34,7 +36,7 @@ class _SettingSwitchState extends State<SettingSwitch> {
         children: [
           Text(
             widget.title,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
+            style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
           ),
           Transform.scale(
             scale: 0.8,
@@ -44,7 +46,7 @@ class _SettingSwitchState extends State<SettingSwitch> {
                 setState(() => _value = newValue);
                 widget.onChanged?.call(newValue);
               },
-              activeThumbColor: const Color(0xFF4A6A64),
+              activeThumbColor: colorScheme.primary,
             ),
           ),
         ],

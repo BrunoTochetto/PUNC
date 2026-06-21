@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../data/servicos/servico_preferencias_usuario.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
@@ -30,13 +31,13 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color corFundoPagina = Color(0xFFD3E4D8);
-    const Color corBotaoPrimario = Color(0xFF5E996E);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return PuncAppShell(
       selectedRoute: '/configuracoes',
       body: Container(
-        color: corFundoPagina,
+        color: theme.scaffoldBackgroundColor,
         child: FutureBuilder<PreferenciasUsuario>(
           future: _preferenciasFuture,
           builder: (context, snapshot) {
@@ -60,7 +61,7 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
 
             return _ConfiguracaoConteudo(
               preferencias: preferencias,
-              corBotao: corBotaoPrimario,
+              colorScheme: colorScheme,
             );
           },
         ),
@@ -72,16 +73,14 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
 class _ConfiguracaoConteudo extends StatelessWidget {
   const _ConfiguracaoConteudo({
     required this.preferencias,
-    required this.corBotao,
+    required this.colorScheme,
   });
 
   final PreferenciasUsuario preferencias;
-  final Color corBotao;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    const Color corTextoEscuro = Color(0xFF2C2C2C);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -89,10 +88,10 @@ class _ConfiguracaoConteudo extends StatelessWidget {
         children: [
           Text(
             'Configurações',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 22,
-              color: corTextoEscuro,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 22),
@@ -106,9 +105,9 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                   icon: Icons.devices_outlined,
                   title: 'Informações do dispositivo',
                 ),
-                _buildInfoRow('ID/MAC do dispositivo', preferencias.idDispositivo ?? 'Não configurado'),
-                _buildInfoRow('Tópico FCM', preferencias.topicoFcm ?? 'Não configurado'),
-                _buildInfoRow('Status', preferencias.configurado ? 'Configurado' : 'Não configurado'),
+                _buildInfoRow('ID/MAC do dispositivo', preferencias.idDispositivo ?? 'Não configurado', context),
+                _buildInfoRow('Tópico FCM', preferencias.topicoFcm ?? 'Não configurado', context),
+                _buildInfoRow('Status', preferencias.configurado ? 'Configurado' : 'Não configurado', context),
               ],
             ),
           ),
@@ -140,17 +139,18 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                   onChanged: (value) {},
                 ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pushNamed(
-                      context,
-                      '/debug-notificacoes',
+                if (kDebugMode)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        '/debug-notificacoes',
+                      ),
+                      icon: const Icon(Icons.bug_report_outlined),
+                      label: const Text('Abrir depuração de notificações'),
                     ),
-                    icon: const Icon(Icons.bug_report_outlined),
-                    label: const Text('Abrir depuração de notificações'),
                   ),
-                ),
               ],
             ),
           ),
@@ -159,7 +159,9 @@ class _ConfiguracaoConteudo extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -167,9 +169,9 @@ class _ConfiguracaoConteudo extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF555555),
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -177,9 +179,9 @@ class _ConfiguracaoConteudo extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF2C2C2C),
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
@@ -191,15 +193,17 @@ class _ConfiguracaoConteudo extends StatelessWidget {
   }
 
   Widget _buildContainer(BuildContext context, {required Widget child}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: colorScheme.surface),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: colorScheme.onSurface.withAlpha(50),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

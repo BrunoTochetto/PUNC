@@ -8,11 +8,12 @@ class CronogramaViewModel {
 
   final ConsultarCronogramaColeta _consultarCronograma;
 
-  Future<List<HorarioColeta>> carregar({String cep = '89890000'}) async {
+  Future<List<HorarioColeta>> carregar({String cep = ''}) async {
     try {
       return await _consultarCronograma.executar(cep: cep);
     } catch (_) {
       return _cronogramaDesenvolvimento;
+      // return [];
     }
   }
 
@@ -25,7 +26,7 @@ class CronogramaViewModel {
     HorarioColeta(
       diaSemana: 'Terca-feira',
       horarioEstimado: '08:45',
-      tipoLixo: 'Organico',
+      tipoLixo: 'Orgânico',
     ),
     HorarioColeta(
       diaSemana: 'Segunda-feira',

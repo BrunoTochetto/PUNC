@@ -11,9 +11,6 @@ class ConsultarCronogramaColeta {
 
   Future<List<HorarioColeta>> executar({required String cep}) {
     final cepLimpo = cep.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cepLimpo.length != 8) {
-      throw ArgumentError('CEP deve conter 8 dígitos.');
-    }
 
     return _repositorio.listarPorCep(cepLimpo);
   }

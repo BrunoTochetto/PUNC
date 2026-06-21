@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../nucleo/temas/appCores.dart';
 
 class PuncAppShell extends StatelessWidget {
   const PuncAppShell({
@@ -14,30 +15,29 @@ class PuncAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cores Claras e Vibrantes (Identidade Figma)
-    const Color corAppBar = Color(0xFF486062);      // Verde escuro acinzentado do Figma
-    const Color corFundoPagina = Color(0xFFD3E4D8); // Verde pastel suave do fundo
-    const Color corIconeAppBar = Colors.white;
+    // Cores do tema da aplicação
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: corFundoPagina, // Forçando o fundo claro/pastel
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: corAppBar, // Forçando a cor correta da AppBar
+        backgroundColor: colorScheme.primary,
         elevation: 0,
-        iconTheme: const IconThemeData(color: corIconeAppBar),
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
         leadingWidth: 70,
         leading: Padding(
           padding: const EdgeInsets.only(left: 18, top: 8, bottom: 8),
           child: Image.asset('assets/imagens/icones/logo.png'),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Notificações',
-            icon: const Icon(Icons.notifications_none, color: corIconeAppBar),
-            onPressed: () => Navigator.pushNamed(context, '/debug-notificacoes'),
-          ),
-          const SizedBox(width: 8),
-        ],
+        // actions: [
+        //   IconButton(
+        //     tooltip: 'Notificações',
+        //     icon: const Icon(Icons.notifications_none),
+        //     onPressed: () => Navigator.pushNamed(context, '/debug-notificacoes'),
+        //   ),
+        //   const SizedBox(width: 8),
+        // ],
       ),
       floatingActionButton: floatingActionButton,
       body: Column(
@@ -46,10 +46,10 @@ class PuncAppShell extends StatelessWidget {
           // Barra Inferior com Navegação Funcional
           Container(
             height: 72,
-            decoration: const BoxDecoration(
-              color: corAppBar, // Mesma cor da AppBar
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
               boxShadow: [
-                BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))
+                BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -2))
               ],
             ),
             child: Row(
@@ -61,6 +61,7 @@ class PuncAppShell extends StatelessWidget {
                   'Mapa',
                   selectedRoute == '/mapa',
                   '/mapa',
+                  colorScheme.onPrimary,
                 ),
                 _buildBottomNavItem(
                   context,
@@ -68,20 +69,23 @@ class PuncAppShell extends StatelessWidget {
                   'Cronograma',
                   selectedRoute == '/cronograma',
                   '/cronograma',
+                  colorScheme.onPrimary,
                 ),
-                _buildBottomNavItem(
-                  context,
-                  Icons.local_shipping_outlined,
-                  'Gerenciamento',
-                  selectedRoute == '/gerenciamento',
-                  '/gerenciamento',
-                ),
+                // _buildBottomNavItem(
+                //   context,
+                //   Icons.local_shipping_outlined,
+                //   'Gerenciamento',
+                //   selectedRoute == '/gerenciamento',
+                //   '/gerenciamento',
+                //   colorScheme.onPrimary,
+                // ),
                 _buildBottomNavItem(
                   context,
                   Icons.settings_outlined,
                   'Configurações',
                   selectedRoute == '/configuracoes',
                   '/configuracoes',
+                  colorScheme.onPrimary,
                 ),
               ],
             ),
@@ -97,6 +101,7 @@ class PuncAppShell extends StatelessWidget {
     String label,
     bool isSelected,
     String route,
+    Color baseColor,
   ) {
     return GestureDetector(
       onTap: () {
@@ -107,12 +112,12 @@ class PuncAppShell extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: isSelected ? Colors.white : Colors.white60, size: 24),
+          Icon(icon, color: isSelected ? baseColor : baseColor.withOpacity(0.6), size: 24),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white60,
+              color: isSelected ? baseColor : baseColor.withOpacity(0.6),
               fontSize: 10,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),

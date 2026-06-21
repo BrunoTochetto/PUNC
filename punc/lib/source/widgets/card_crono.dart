@@ -16,10 +16,11 @@ class CardCrono extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Forçando cores fixas para bater com o wireframe, independente do tema global
-    const Color corCardBranco = Colors.white; 
-    const Color corBordaCinza = Color(0xFFE0E0E0);
-    const Color corTextoPrincipal = Color(0xFF2C2C2C);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final Color corCardBranco = colorScheme.surface; 
+    final Color corBordaCinza = colorScheme.onSurface;
+    final Color corTextoPrincipal = colorScheme.onSurface;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -44,7 +45,7 @@ class CardCrono extends StatelessWidget {
               children: [
                 Text(
                   day,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: corTextoPrincipal,
@@ -71,7 +72,7 @@ class CardCrono extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 type,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 12,
                   color: corTextoPrincipal,

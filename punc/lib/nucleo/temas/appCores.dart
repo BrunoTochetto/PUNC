@@ -51,7 +51,7 @@ class PUNCCores {
   static const Color escuroErro = Color(0xFFCF6679);
   static const Color escuroOnErro = Colors.white;
 
-  static const Color escuroSuperficie = Color(0xFF2F3A3A);
+  static const Color escuroSuperficie = Color.fromARGB(255, 145, 157, 157);
   static const Color escuroOnSuperficie = Color(0xFFF5F5F5);
 
   static const Color escuroFundo = Color(0xFF1F2727);

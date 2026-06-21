@@ -349,6 +349,7 @@ SELECT
     hc.data_criacao,
     hc.tipo_lixo,
     hc.comentarios,
+    hc.ativo,
     g.id AS id_gerente,
     g.nome_usuario AS nome_gerente,
     g.email AS email_gerente,

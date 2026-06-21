@@ -72,11 +72,17 @@ function formatarDataHora(agora) {
 // Função principal de log
 function logErro(message, error = null, level = 'error') {
     try {
-      const logData = error ? { error } : {};
+      const logData = error instanceof Error || error?.message || error?.stack
+        ? { error }
+        : {};
+
       logger.log(level, message, logData);
-      console.debug(error.message);
     } catch (fileError) {
-      console.error('Erro ao escrever no arquivo de log:', fileError.message);
+      const detalheErro = fileError instanceof Error
+        ? fileError.message
+        : String(fileError);
+
+      console.error('Erro ao escrever no arquivo de log:', detalheErro);
     }
 }
 

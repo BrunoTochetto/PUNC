@@ -28,16 +28,13 @@ class _CronogramaPageState extends State<CronogramaPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Cores Corrigidas: Cards Brancos com Bordas Cinzas
-    const Color corFundoPagina = Color(0xFFD3E4D8); // Verde pastel suave do fundo
-    const Color corAppBar = Color(0xFF486062);      // Verde escuro acinzentado (AppBar/Footer)
-    const Color corBotaoPrimario = Color(0xFF5E996E); // Verde folha suave (Botões)
-    const Color corTextoTitulo = Color(0xFF2C2C2C); // Cinza escuro do design
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return PuncAppShell(
       selectedRoute: '/cronograma',
       body: Container(
-        color: corFundoPagina,
+        color: theme.scaffoldBackgroundColor,
         child: FutureBuilder<List<HorarioColeta>>(
           future: _cronogramaFuture,
           builder: (context, snapshot) {
@@ -55,14 +52,16 @@ class _CronogramaPageState extends State<CronogramaPage> {
             final horarios = snapshot.data ?? [];
             if (horarios.isEmpty) {
               return const EstadoVazio(
-                mensagem: 'Nenhum horário de coleta encontrado para sua região.',
+                mensagem: 'Nenhum horário de coleta encontrado para sua região...',
               );
+              // ! To-do: Adicionar para, se não achar nada a pessoa colocar seu CEP. Dai ele vai mudando de coisa pra coisa
+              // ! Também! Quando ele pega os dados, ele deve salvar LOCALMENTE no HIVE.
             }
 
             return _CronogramaConteudo(
               horarios: horarios,
-              corBotao: corBotaoPrimario,
-              corTexto: corTextoTitulo,
+              corBotao: colorScheme.secondary,
+              corTexto: colorScheme.onSurface,
             );
           },
         ),
@@ -84,6 +83,8 @@ class _CronogramaConteudo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
@@ -121,7 +122,7 @@ class _CronogramaConteudo extends StatelessWidget {
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: corBotao,
-                foregroundColor: Colors.white,
+                foregroundColor: colorScheme.onPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -129,10 +130,10 @@ class _CronogramaConteudo extends StatelessWidget {
               ),
               child: const Text(
                 'Cronograma completo',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+                // style: TextStyle(
+                //   fontSize: 14,
+                //   fontWeight: FontWeight.bold,
+                // ),
               ),
             ),
           ),
@@ -143,7 +144,7 @@ class _CronogramaConteudo extends StatelessWidget {
 
   Color _corTipo(String tipo) {
     final normalizado = tipo.toLowerCase();
-    if (normalizado.contains('organ')) return const Color(0xFF8B4513);
+    if (normalizado.contains('organ') || normalizado.contains('orgân')) return const Color(0xFF8B4513);
     return const Color(0xFF4AA564);
   }
 }

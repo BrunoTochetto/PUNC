@@ -8,30 +8,26 @@ class AdicaoCronogramaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cores ajustadas para serem mais claras e vibrantes (Identidade PUNC)
-    const Color corFundoPagina = Color(0xFFF8F9FA); // Cinza quase branco, bem limpo
-    const Color corAppBar = Color(0xFF5BA7B4);      // Verde água/Teal vibrante do Figma
-    const Color corBotaoPrimario = Color(0xFF5E9A78); // Verde folha/saúde do Figma
-    const Color corCardBranco = Colors.white; 
-    const Color corTextoEscuro = Color(0xFF333333);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: corFundoPagina,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: corAppBar,
+        backgroundColor: colorScheme.primary,
         elevation: 0,
         centerTitle: false,
         leading: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Container(
             decoration: const BoxDecoration(color: Colors.white30, shape: BoxShape.circle),
-            child: const Icon(Icons.eco, color: Colors.white, size: 20),
+            child: Icon(Icons.eco, color: colorScheme.onPrimary, size: 20),
           ),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.notifications_none, color: Colors.white), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.settings_outlined, color: Colors.white), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.menu, color: Colors.white), onPressed: () {}),
+          IconButton(icon: Icon(Icons.notifications_none, color: colorScheme.onPrimary), onPressed: () {}),
+          IconButton(icon: Icon(Icons.settings_outlined, color: colorScheme.onPrimary), onPressed: () {}),
+          IconButton(icon: Icon(Icons.menu, color: colorScheme.onPrimary), onPressed: () {}),
         ],
       ),
       body: SingleChildScrollView(
@@ -42,7 +38,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: corCardBranco,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
               ),
@@ -51,20 +47,20 @@ class AdicaoCronogramaPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: corBotaoPrimario.withOpacity(0.1),
+                      color: colorScheme.secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.assignment_outlined, size: 28, color: corBotaoPrimario),
+                    child: Icon(Icons.assignment_outlined, size: 28, color: colorScheme.secondary),
                   ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Adição de cronograma', 
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: corTextoEscuro)),
+                      Text('Adição de cronograma', 
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colorScheme.onSurface)),
                       const SizedBox(height: 2),
                       Text('Preencha as informações para\nadicionar um cronograma de coleta', 
-                        style: TextStyle(fontSize: 11, color: corTextoEscuro.withOpacity(0.6))),
+                        style: TextStyle(fontSize: 11, color: colorScheme.onSurface.withOpacity(0.6))),
                     ],
                   ),
                 ],
@@ -79,20 +75,20 @@ class AdicaoCronogramaPage extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children: [
-                      _buildStepItem('1', 'Selecione o grupo', _buildDropdown('Recicla Norte', Icons.groups_outlined, corBotaoPrimario), corBotaoPrimario),
-                      _buildStepItem('2', 'Selecione o tipo de coleta', const SeletorTipoColeta(), corBotaoPrimario),
-                      _buildStepItem('3', 'Selecione os dias da semana', const SeletorDiasSemana(), corBotaoPrimario),
+                      _buildStepItem('1', 'Selecione o grupo', _buildDropdown('Recicla Norte', Icons.groups_outlined, colorScheme.secondary), colorScheme.secondary),
+                      _buildStepItem('2', 'Selecione o tipo de coleta', const SeletorTipoColeta(), colorScheme.secondary),
+                      _buildStepItem('3', 'Selecione os dias da semana', const SeletorDiasSemana(), colorScheme.secondary),
                       _buildStepItem('4', 'Selecione o horário', 
                         Row(
                           children: [
-                            Expanded(child: _buildTimePicker('Horário de início', '08:00', corBotaoPrimario)),
+                            Expanded(child: _buildTimePicker('Horário de início', '08:00', colorScheme.secondary)),
                             const SizedBox(width: 12),
-                            Expanded(child: _buildTimePicker('Horário de término', '12:00', corBotaoPrimario)),
+                            Expanded(child: _buildTimePicker('Horário de término', '12:00', colorScheme.secondary)),
                           ],
                         ),
-                        corBotaoPrimario,
+                        colorScheme.secondary,
                       ),
-                      _buildStepItem('5', 'Defina a frequência', _buildDropdown('Semanal', Icons.sync, corBotaoPrimario), corBotaoPrimario),
+                      _buildStepItem('5', 'Defina a frequência', _buildDropdown('Semanal', Icons.sync, colorScheme.secondary), colorScheme.secondary),
                       _buildStepItem('6', 'Observações (opcional)', 
                         TextField(
                           maxLines: 3,
@@ -100,7 +96,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
                             hintText: 'Adicione informações adicionais sobre o cronograma...',
                             hintStyle: TextStyle(fontSize: 10, color: Colors.grey.shade400),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: colorScheme.surface,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -112,7 +108,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
                             contentPadding: const EdgeInsets.all(12),
                           ),
                         ),
-                        corBotaoPrimario,
+                        colorScheme.secondary,
                         isLast: true,
                       ),
                       const SizedBox(height: 20),
@@ -135,8 +131,8 @@ class AdicaoCronogramaPage extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: corBotaoPrimario,
-                                foregroundColor: Colors.white,
+                                backgroundColor: colorScheme.secondary,
+                                foregroundColor: colorScheme.onSecondary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -157,7 +153,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
                     children: [
                       const CardResumoCronograma(),
                       const SizedBox(height: 20),
-                      _buildAreaAtendimento(corBotaoPrimario),
+                      _buildAreaAtendimento(colorScheme.secondary, colorScheme.surface, colorScheme.onSurface),
                     ],
                   ),
                 ),
@@ -169,16 +165,16 @@ class AdicaoCronogramaPage extends StatelessWidget {
       bottomNavigationBar: Container(
         height: 70,
         decoration: BoxDecoration(
-          color: corAppBar,
+          color: colorScheme.primary,
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -2))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.map_outlined, 'Mapa', false),
-            _buildNavItem(Icons.groups_outlined, 'Grupos', false),
-            _buildNavItem(Icons.calendar_today, 'Cronograma', true),
-            _buildNavItem(Icons.person_outline, 'Perfil', false),
+            _buildNavItem(Icons.map_outlined, 'Mapa', false, colorScheme.onPrimary),
+            _buildNavItem(Icons.groups_outlined, 'Grupos', false, colorScheme.onPrimary),
+            _buildNavItem(Icons.calendar_today, 'Cronograma', true, colorScheme.onPrimary),
+            _buildNavItem(Icons.person_outline, 'Perfil', false, colorScheme.onPrimary),
           ],
         ),
       ),
@@ -220,7 +216,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, 
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF333333))),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 10),
                 content,
                 const SizedBox(height: 20),
@@ -236,7 +232,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         border: Border.all(color: Colors.grey.shade200),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -244,7 +240,7 @@ class AdicaoCronogramaPage extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: accentColor),
           const SizedBox(width: 10),
-          Text(value, style: const TextStyle(fontSize: 12, color: Color(0xFF333333))),
+          Text(value, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface)),
           const Spacer(),
           Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey.shade300),
         ],
@@ -261,13 +257,13 @@ class AdicaoCronogramaPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
-              Text(time, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+              Text(time, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
               const Spacer(),
               Icon(Icons.access_time, size: 16, color: accentColor),
             ],
@@ -277,11 +273,11 @@ class AdicaoCronogramaPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAreaAtendimento(Color accentColor) {
+  Widget _buildAreaAtendimento(Color accentColor, Color surfaceColor, Color onSurfaceColor) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
       ),
@@ -296,8 +292,8 @@ class AdicaoCronogramaPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Área de atendimento', 
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF333333))),
+                    Text('Área de atendimento', 
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: onSurfaceColor)),
                     Text('Visualização aproximada...', 
                       style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
                   ],
@@ -325,15 +321,15 @@ class AdicaoCronogramaPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isSelected) {
+  Widget _buildNavItem(IconData icon, String label, bool isSelected, Color baseColor) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: isSelected ? Colors.white : Colors.white.withOpacity(0.7), size: 24),
+        Icon(icon, color: isSelected ? baseColor : baseColor.withOpacity(0.7), size: 24),
         const SizedBox(height: 4),
         Text(label, 
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.7), 
+            color: isSelected ? baseColor : baseColor.withOpacity(0.7), 
             fontSize: 10,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),

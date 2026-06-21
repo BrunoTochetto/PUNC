@@ -10,7 +10,7 @@ import { logErro, logAviso, logInfo } from '../services/logErrors.js';
 */
 async function listar(req, res) {
   try {
-    const { cep } = req.params;
+    const { cep } = req.params ? req.params : '8';
 
     if (!cep) {
       await logAviso('Listar horarios de coleta: dados incompletos recebidos: ' + `cep: ${cep}`, null);

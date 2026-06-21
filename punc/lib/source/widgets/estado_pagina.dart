@@ -6,9 +6,11 @@ class EstadoCarregando extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Cor de destaque do Figma (Verde Água/Ciano)
-    const Color corDestaque = Color(0xFF5BA7B4);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final Color corDestaque = colorScheme.primary;
 
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
         color: corDestaque,
         strokeWidth: 3,
@@ -29,9 +31,13 @@ class EstadoErro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color corErro = Color(0xFFE57373); // Vermelho suave
-    const Color corTexto = Color(0xFF2C2C2C);
-    const Color corBotao = Color(0xFF5E996E); // Verde folha suave
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final Color corErro = colorScheme.error; // Vermelho suave
+    final Color corTexto = colorScheme.onSurface;
+    final Color corBotao = colorScheme.primary;
+    final Color corTextoBotao = colorScheme.onPrimary;
 
     return Center(
       child: Padding(
@@ -39,28 +45,28 @@ class EstadoErro extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
               size: 56,
-              color: corErro,
+              color: corErro.withValues(alpha: 0.9),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               mensagem,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: corTexto,
+              style: TextStyle(
+                color: corTexto.withValues(alpha: 0.9),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
             if (onTentarNovamente != null) ...[
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: onTentarNovamente,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: corBotao,
-                  foregroundColor: Colors.white,
+                  backgroundColor: corBotao.withValues(alpha: 0.9),
+                  foregroundColor: corTextoBotao.withValues(alpha: 0.9),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -85,7 +91,10 @@ class EstadoVazio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color corTexto = Color(0xFF2C2C2C);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final Color corTexto = colorScheme.onSurface;
 
     return Center(
       child: Padding(
@@ -94,16 +103,17 @@ class EstadoVazio extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.inbox_outlined,
+              Icons.satellite_alt_rounded,
+
               size: 56,
-              color: corTexto.withOpacity(0.2),
+              color: corTexto.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               mensagem,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: corTexto.withOpacity(0.5),
+                color: corTexto.withValues(alpha: 0.5),
                 fontSize: 16,
               ),
             ),
