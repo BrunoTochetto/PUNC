@@ -112,12 +112,12 @@ class PuncAppShell extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: isSelected ? baseColor : baseColor.withOpacity(0.6), size: 24),
+          Icon(icon, color: isSelected ? baseColor : baseColor.withValues(alpha: 0.6), size: 24),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? baseColor : baseColor.withOpacity(0.6),
+              color: isSelected ? baseColor : baseColor.withValues(alpha: 0.6),
               fontSize: 10,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),

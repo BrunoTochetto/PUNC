@@ -27,7 +27,7 @@ class CardPerfil extends StatelessWidget {
         border: Border.all(color: corBordaCinza), // Borda Cinza Clara
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -62,7 +62,7 @@ class CardPerfil extends StatelessWidget {
                       child: Text(
                         detail.keys.first,
                         style: TextStyle(
-                          color: corTextoPrincipal.withOpacity(0.6),
+                          color: corTextoPrincipal.withValues(alpha: 0.6),
                           fontSize: 14,
                         ),
                       ),

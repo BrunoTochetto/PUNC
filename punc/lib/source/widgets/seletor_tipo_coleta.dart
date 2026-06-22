@@ -20,7 +20,7 @@ class SeletorTipoColeta extends StatelessWidget {
       width: 80,
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.2) : Colors.white,
+        color: isSelected ? color.withValues(alpha: 0.2) : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: isSelected ? color : Colors.grey.shade300),
       ),

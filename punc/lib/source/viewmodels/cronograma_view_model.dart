@@ -12,8 +12,8 @@ class CronogramaViewModel {
     try {
       return await _consultarCronograma.executar(cep: cep);
     } catch (_) {
-      return _cronogramaDesenvolvimento;
-      // return [];
+      // return _cronogramaDesenvolvimento;
+      return [];
     }
   }
 

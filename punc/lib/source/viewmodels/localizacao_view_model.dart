@@ -49,7 +49,7 @@ class LocalizacaoViewModel {
     await _servicoNotificacoes.inicializar();
     final tokenFcm = await _servicoNotificacoes.obterTokenFcm();
     debugPrint(
-      '[PUNC notificacoes] token_fcm=${tokenFcm == null ? 'null' : '${tokenFcm.length} caracteres'}',
+      '[PUNC notificacoes] token_fcm=${tokenFcm == null ? 'null' : '$tokenFcm caracteres'}',
     );
 
     final identificacao =

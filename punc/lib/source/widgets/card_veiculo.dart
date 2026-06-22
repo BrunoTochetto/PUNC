@@ -39,7 +39,7 @@ class CardVeiculo extends StatelessWidget {
         border: Border.all(color: corBordaCinza), // Borda Cinza Clara
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -57,9 +57,9 @@ class CardVeiculo extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: corIconeDestaque.withOpacity(0.05),
+                  color: corIconeDestaque.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: corIconeDestaque.withOpacity(0.3), width: 1),
+                  border: Border.all(color: corIconeDestaque.withValues(alpha: 0.3), width: 1),
                 ),
                 child: Icon(
                   Icons.local_shipping,
@@ -86,14 +86,14 @@ class CardVeiculo extends StatelessWidget {
                     Text(
                       'Motorista: $driver',
                       style: TextStyle(
-                        color: corTextoPrincipal.withOpacity(0.6),
+                        color: corTextoPrincipal.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                     ),
                     Text(
                       'Placa: $plate',
                       style: TextStyle(
-                        color: corTextoPrincipal.withOpacity(0.6),
+                        color: corTextoPrincipal.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                     ),
@@ -124,7 +124,7 @@ class CardVeiculo extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.08),
+                  color: statusColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -176,7 +176,7 @@ class CardVeiculo extends StatelessWidget {
     required VoidCallback onPressed,
     Color? textColor,
   }) {
-    final color = textColor ?? const Color(0xFF2C2C2C).withOpacity(0.5);
+    final color = textColor ?? const Color(0xFF2C2C2C).withValues(alpha: 0.5);
 
     return TextButton.icon(
       onPressed: onPressed,

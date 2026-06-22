@@ -31,7 +31,7 @@ class CardCrono extends StatelessWidget {
         border: Border.all(color: corBordaCinza), // Adicionada borda cinza clara
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -55,7 +55,7 @@ class CardCrono extends StatelessWidget {
                 Text(
                   'Coleta: $time',
                   style: TextStyle(
-                    color: corTextoPrincipal.withOpacity(0.6),
+                    color: corTextoPrincipal.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),

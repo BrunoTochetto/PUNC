@@ -9,7 +9,7 @@ class CardResumoCronograma extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFDFF1E8).withOpacity(0.5),
+        color: const Color(0xFFDFF1E8).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(

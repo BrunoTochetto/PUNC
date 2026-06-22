@@ -59,7 +59,7 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
                     'Controle o status do seu percurso e acompanhe '
                     'o envio de localização em tempo real.',
                     style: TextStyle(
-                      color: corTextoEscuro.withOpacity(0.7),
+                      color: corTextoEscuro.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -88,7 +88,7 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: corBotaoPrimario,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: corBotaoPrimario.withOpacity(0.4),
+                            disabledBackgroundColor: corBotaoPrimario.withValues(alpha: 0.4),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -114,11 +114,11 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
                               : null,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: corErro,
-                            disabledForegroundColor: corErro.withOpacity(0.4),
+                            disabledForegroundColor: corErro.withValues(alpha: 0.4),
                             side: BorderSide(
                               color: viewModel.estaEmPercurso
                                   ? corErro
-                                  : corErro.withOpacity(0.4),
+                                  : corErro.withValues(alpha: 0.4),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -143,7 +143,7 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: corErro.withOpacity(0.1),
+                        color: corErro.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: corErro),
                       ),
@@ -194,7 +194,7 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
         border: Border.all(color: const Color(0xFFE0E0E0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -244,7 +244,7 @@ class _MotoristaPaginaExemploState extends State<MotoristaPaginaExemplo> {
         border: Border.all(color: const Color(0xFFE0E0E0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

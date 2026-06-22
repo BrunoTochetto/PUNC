@@ -41,7 +41,7 @@ class ItemEtapaCronograma extends StatelessWidget {
                 Expanded(
                   child: Container(
                     width: 2,
-                    color: PUNCCores.escuroPrimaria.withOpacity(0.3),
+                    color: PUNCCores.escuroPrimaria.withValues(alpha: 0.3),
                   ),
                 ),
             ],

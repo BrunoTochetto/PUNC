@@ -12,7 +12,7 @@ class BarraBuscaMapa extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -41,7 +41,7 @@ class BarraBuscaMapa extends StatelessWidget {
           Container(
             width: 1,
             height: 40,
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             margin: const EdgeInsets.symmetric(horizontal: 12),
           ),
           Column(

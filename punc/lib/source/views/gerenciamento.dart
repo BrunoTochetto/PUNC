@@ -97,7 +97,7 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
             ),
             Text(
               'Motoristas e Caminhões',
-              style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+              style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 20),
             
@@ -138,11 +138,11 @@ class _GerenciamentoPageState extends State<GerenciamentoPage> {
                 fillColor: colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
+                  borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
+                  borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
                 ),
               ),
               onChanged: (value) => setState(() => _filtro = value),

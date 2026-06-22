@@ -38,7 +38,7 @@ class SeletorDiasSemana extends StatelessWidget {
       width: 40,
       height: 45,
       decoration: BoxDecoration(
-        color: isSelected ? PUNCCores.escuroPrimaria.withOpacity(0.2) : Colors.white,
+        color: isSelected ? PUNCCores.escuroPrimaria.withValues(alpha: 0.2) : Colors.white,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: isSelected ? PUNCCores.escuroPrimaria : Colors.grey.shade300),
       ),
