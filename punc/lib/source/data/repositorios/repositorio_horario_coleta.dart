@@ -12,7 +12,6 @@ class RepositorioHorarioColeta {
     final resposta = await _client.get('/api/horariosColeta/$cep');
     return _extrairHorarios(resposta);
   }
-
   /// GET /api/horariosColeta/gerente/
   Future<List<HorarioColeta>> listarPorGerente({
     required int idGerente,
@@ -25,7 +24,9 @@ class RepositorioHorarioColeta {
     final lista = resposta['horarios'] as List<dynamic>?;
     if (lista != null) {
       return lista
-          .map((item) => HorarioColeta.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => HorarioColeta.fromMap(item as Map<dynamic, dynamic>),
+          )
           .toList();
     }
 
@@ -88,13 +89,18 @@ class RepositorioHorarioColeta {
   List<HorarioColeta> _extrairHorarios(Map<String, dynamic> resposta) {
     if (resposta['horarios'] is List) {
       return (resposta['horarios'] as List)
-          .map((item) => HorarioColeta.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => HorarioColeta.fromMap(item as Map<dynamic, dynamic>),
+          )
           .toList();
     }
 
     return resposta.entries
         .where((entry) => int.tryParse(entry.key) != null)
-        .map((entry) => HorarioColeta.fromJson(entry.value as Map<String, dynamic>))
+        .map(
+          (entry) =>
+              HorarioColeta.fromMap(entry.value as Map<dynamic, dynamic>),
+        )
         .toList();
   }
 }

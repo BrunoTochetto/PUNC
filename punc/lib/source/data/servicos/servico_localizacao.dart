@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:geolocator/geolocator.dart';
 
 import '../../../nucleo/erros/excecoes.dart';
@@ -16,7 +18,7 @@ class ServicoLocalizacao {
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
       ),
-    );
+    ).timeout(const Duration(seconds: 15));
 
     return LocalizacaoUsuario(
       latitude: posicao.latitude,

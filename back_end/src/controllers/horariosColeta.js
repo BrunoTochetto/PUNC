@@ -10,7 +10,8 @@ import { logErro, logAviso, logInfo } from '../services/logErrors.js';
 */
 async function listar(req, res) {
   try {
-    const { cep } = req.params ? req.params : '8';
+    const { cep } = req.params;
+    await logInfo(`Listar horarios de coleta: CEP recebido = ${cep}`);
 
     if (!cep) {
       await logAviso('Listar horarios de coleta: dados incompletos recebidos: ' + `cep: ${cep}`, null);
@@ -19,44 +20,54 @@ async function listar(req, res) {
 			});
     };
 
-    let cepOBJ;
+    // Valida o CEP e limpa para apenas dígitos
+    let cepLimpo;
     try {
-			cepOBJ = new CEP(cep);
-		} catch (err) {
+      cepLimpo = new CEP(cep);
+      if (!cepLimpo) {
+        await logAviso(`Cadastro: CEP inválido - ${cep}`, null);
+        return res.status(400).json({ erro: 'CEP inválido.' });
+      }
+    } catch (err) {
 			await logAviso(`Cadastro: CEP inválido - ${cep}`, err);
 			return res.status(400).json({ erro: err.message });
 		}
 
+    /*
+     * Busca progressiva por prefixo:
+     * A área de atuação armazena um CEP que pode ser parcial (ex: "897" para região ampla).
+     * Comparamos: LEFT($1, LENGTH(a.cep)) = a.cep
+     * Isso casa o CEP do usuário com qualquer nível de precisão da área.
+     * Ex: cep do usuário = "89700123", a.cep = "897" → LEFT("89700123", 3) = "897" → match!
+     */
     const query = `
-    SELECT horario_estimado, dia_semana, tipo_lixo, comentarios, ativo
-    FROM vw_horarios_coleta
-    WHERE cep LIKE '${cep}%'
-    AND ativo = TRUE
-    ORDER BY horario_estimado
+    SELECT hc.horario_estimado, hc.dia_semana, hc.tipo_lixo, hc.comentarios, hc.ativo,
+           a.cep AS cep_area
+    FROM horarios_coleta hc
+    JOIN area_de_atuacao a ON a.id = hc.id_area_atuacao
+    WHERE LEFT($1, LENGTH(a.cep)) = a.cep
+    AND hc.ativo = TRUE
+    ORDER BY LENGTH(a.cep) DESC, hc.horario_estimado
     `;
 
-    const resultado = await querry(query);
+    const resultado = await querry(query, [cepLimpo.value]);
 
-    // Verificar se gerente existe
     if (resultado.rows.length === 0) {
-      await logAviso(`Sem nenhum horario estimado encontrado.`);
-      return res.status(401).json({ 
-        message: "Sem horario estimado registrado..." 
+      await logAviso(`Nenhum horario encontrado para o CEP ${cepLimpo}.`);
+      return res.status(200).json({ 
+        message: "Nenhum horário encontrado para este CEP.",
+        horarios: []
       });
     }
 
-    const horarios = resultado.rows;
-
     res.status(200).json({
       message: resultado.rows.length + " horarios encontrados.",
-      ...resultado.rows
-    })
-
-
+      horarios: resultado.rows
+    });
 
   } catch (e) {
     res.status(500);
-    logErro("emPercurso", e);
+    logErro("Listar horarios por CEP", e);
   }
 };
 

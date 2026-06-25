@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -7,12 +8,17 @@ import '../../nucleo/segredos/api_config.dart';
 
 /// Cliente HTTP centralizado para comunicação com a API REST do back-end.
 class ApiClient {
-  ApiClient({http.Client? client, String? baseUrl})
-      : _client = client ?? http.Client(),
-        _baseUrl = baseUrl ?? ApiConfig.baseUrl;
+  ApiClient({
+    http.Client? client,
+    String? baseUrl,
+    Duration? timeout,
+  })  : _client = client ?? http.Client(),
+        _baseUrl = baseUrl ?? ApiConfig.baseUrl,
+        _timeout = timeout ?? const Duration(seconds: 12);
 
   final http.Client _client;
   final String _baseUrl;
+  final Duration _timeout;
   String? _token;
 
   void definirToken(String? token) => _token = token;
@@ -70,41 +76,53 @@ class ApiClient {
     switch (metodo) {
       case 'GET':
         if (corpo == null) {
-          resposta = await _client.get(uri, headers: headers);
+          resposta = await _executarComTimeout(
+            _client.get(uri, headers: headers),
+          );
         } else {
           final requisicao = http.Request('GET', uri)
             ..headers.addAll(headers)
             ..body = jsonEncode(corpo);
-          final streamed = await _client.send(requisicao);
-          resposta = await http.Response.fromStream(streamed);
+          resposta = await _executarComTimeout(() async {
+            final streamed = await _client.send(requisicao);
+            return http.Response.fromStream(streamed);
+          }());
         }
         break;
       case 'POST':
-        resposta = await _client.post(
-          uri,
-          headers: headers,
-          body: corpo == null ? null : jsonEncode(corpo),
+        resposta = await _executarComTimeout(
+          _client.post(
+            uri,
+            headers: headers,
+            body: corpo == null ? null : jsonEncode(corpo),
+          ),
         );
         break;
       case 'PUT':
-        resposta = await _client.put(
-          uri,
-          headers: headers,
-          body: corpo == null ? null : jsonEncode(corpo),
+        resposta = await _executarComTimeout(
+          _client.put(
+            uri,
+            headers: headers,
+            body: corpo == null ? null : jsonEncode(corpo),
+          ),
         );
         break;
       case 'PATCH':
-        resposta = await _client.patch(
-          uri,
-          headers: headers,
-          body: corpo == null ? null : jsonEncode(corpo),
+        resposta = await _executarComTimeout(
+          _client.patch(
+            uri,
+            headers: headers,
+            body: corpo == null ? null : jsonEncode(corpo),
+          ),
         );
         break;
       case 'DELETE':
-        resposta = await _client.delete(
-          uri,
-          headers: headers,
-          body: corpo == null ? null : jsonEncode(corpo),
+        resposta = await _executarComTimeout(
+          _client.delete(
+            uri,
+            headers: headers,
+            body: corpo == null ? null : jsonEncode(corpo),
+          ),
         );
         break;
       default:
@@ -114,13 +132,24 @@ class ApiClient {
     return _interpretarResposta(resposta);
   }
 
+  Future<http.Response> _executarComTimeout(
+    Future<http.Response> requisicao,
+  ) {
+    return requisicao.timeout(
+      _timeout,
+      onTimeout: () => throw FalhaApi(
+        'Tempo esgotado ao comunicar com o servidor.',
+      ),
+    );
+  }
+
   Map<String, dynamic> _interpretarResposta(http.Response resposta) {
     Map<String, dynamic> dados = {};
 
     if (resposta.body.isNotEmpty) {
       final decodificado = jsonDecode(resposta.body);
-      if (decodificado is Map<String, dynamic>) {
-        dados = decodificado;
+      if (decodificado is Map) {
+        dados = Map<String, dynamic>.from(decodificado);
       } else if (decodificado is List) {
         dados = {'dados': decodificado};
       }

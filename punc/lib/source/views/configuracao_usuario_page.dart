@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../data/servicos/servico_preferencias_usuario.dart';
+import '../viewmodels/configuracao_view_model.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
 import '../widgets/section_header.dart';
@@ -62,6 +63,8 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
             return _ConfiguracaoConteudo(
               preferencias: preferencias,
               colorScheme: colorScheme,
+              servicoPreferencias: _servicoPreferencias,
+              onAtualizar: () => setState(_carregar),
             );
           },
         ),
@@ -70,14 +73,109 @@ class _ConfiguracaoUsuarioPageState extends State<ConfiguracaoUsuarioPage> {
   }
 }
 
-class _ConfiguracaoConteudo extends StatelessWidget {
+class _ConfiguracaoConteudo extends StatefulWidget {
   const _ConfiguracaoConteudo({
     required this.preferencias,
     required this.colorScheme,
+    required this.servicoPreferencias,
+    required this.onAtualizar,
   });
 
   final PreferenciasUsuario preferencias;
   final ColorScheme colorScheme;
+  final ServicoPreferenciasUsuario servicoPreferencias;
+  final VoidCallback onAtualizar;
+
+  @override
+  State<_ConfiguracaoConteudo> createState() => _ConfiguracaoConteudoState();
+}
+
+class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
+  final ConfiguracaoViewModel _viewModel = ConfiguracaoViewModel();
+  bool _reiniciando = false;
+
+  PreferenciasUsuario get preferencias => widget.preferencias;
+  ColorScheme get colorScheme => widget.colorScheme;
+
+  bool get _podeReiniciarTopico =>
+      preferencias.configurado && (preferencias.topicoFcm?.isNotEmpty ?? false);
+
+  Future<void> _mudarCep() async {
+    final controller = TextEditingController(text: preferencias.cep ?? '');
+    final novoCep = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Mudar CEP'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            maxLength: 9,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Digite seu CEP',
+              prefixIcon: Icon(Icons.local_post_office_outlined),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final cep = controller.text.trim();
+                if (cep.isEmpty) return;
+                Navigator.pop(context, cep);
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (novoCep == null || !mounted) return;
+
+    await widget.servicoPreferencias.salvarCep(novoCep);
+    widget.onAtualizar();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('CEP atualizado com sucesso.')),
+    );
+  }
+
+  Future<void> _reiniciarTopico() async {
+    await _executarReinicio(_viewModel.reiniciarTopicoFcm);
+  }
+
+  Future<void> _reiniciarAmbos() async {
+    await _executarReinicio(_viewModel.reiniciarAmbos);
+  }
+
+  Future<void> _executarReinicio(
+    Future<ResultadoReinicio> Function() acao,
+  ) async {
+    setState(() => _reiniciando = true);
+    try {
+      final resultado = await acao();
+      if (!mounted) return;
+
+      widget.onAtualizar();
+
+      if (resultado.mensagem != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(resultado.mensagem!)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _reiniciando = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +194,6 @@ class _ConfiguracaoConteudo extends StatelessWidget {
           ),
           const SizedBox(height: 22),
 
-          // Bloco de Informações do Dispositivo
           _buildContainer(
             context,
             child: Column(
@@ -105,16 +202,107 @@ class _ConfiguracaoConteudo extends StatelessWidget {
                   icon: Icons.devices_outlined,
                   title: 'Informações do dispositivo',
                 ),
-                _buildInfoRow('ID/MAC do dispositivo', preferencias.idDispositivo ?? 'Não configurado', context),
-                _buildInfoRow('Tópico FCM', preferencias.topicoFcm ?? 'Não configurado', context),
-                _buildInfoRow('Status', preferencias.configurado ? 'Configurado' : 'Não configurado', context),
+                _buildInfoRow(
+                  'ID/MAC do dispositivo',
+                  preferencias.idDispositivo ?? 'Não configurado',
+                  context,
+                ),
+                _buildInfoRow(
+                  'Status',
+                  preferencias.configurado ? 'Configurado' : 'Não configurado',
+                  context,
+                ),
               ],
             ),
           ),
 
           const SizedBox(height: 22),
 
-          // Bloco de Notificações
+          _buildContainer(
+            context,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SectionHeader(
+                  icon: Icons.location_on_outlined,
+                  title: 'Localização e notificações',
+                ),
+                _buildInfoRow(
+                  'CEP',
+                  preferencias.cep ?? 'Não informado',
+                  context,
+                  trailing: TextButton(
+                    onPressed: _reiniciando ? null : _mudarCep,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text('Mudar'),
+                  ),
+                ),
+                _buildInfoRow(
+                  'Tópico FCM',
+                  preferencias.topicoFcm ?? 'Não configurado',
+                  context,
+                ),
+                const Divider(height: 24),
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 0,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    TextButton.icon(
+                      onPressed: _reiniciando || !_podeReiniciarTopico
+                          ? null
+                          : _reiniciarTopico,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Reiniciar tópico'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _reiniciando || !_podeReiniciarTopico
+                          ? null
+                          : _reiniciarAmbos,
+                      icon: const Icon(Icons.sync, size: 18),
+                      label: const Text('Reiniciar ambos'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    if (_reiniciando)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                  ],
+                ),
+                if (!_podeReiniciarTopico)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Configure a localização no primeiro acesso para reiniciar o tópico.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
           _buildContainer(
             context,
             child: Column(
@@ -159,13 +347,18 @@ class _ConfiguracaoConteudo extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, BuildContext context) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    BuildContext context, {
+    Widget? trailing,
+  }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
@@ -175,6 +368,7 @@ class _ConfiguracaoConteudo extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               value,
@@ -187,6 +381,7 @@ class _ConfiguracaoConteudo extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          ?trailing,
         ],
       ),
     );

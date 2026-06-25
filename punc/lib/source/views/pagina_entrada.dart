@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/servicos/servico_notificacoes.dart';
@@ -30,12 +32,7 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
     }
 
     if (preferencias.configurado && preferencias.topicoFcm != null) {
-      try {
-        await _servicoNotificacoes.inicializar();
-        await _servicoNotificacoes.inscreverNoTopico(preferencias.topicoFcm!);
-      } catch (_) {
-        // O app segue mesmo se a reinscricao no topico falhar.
-      }
+      _inicializarNotificacoesEmBackground(preferencias.topicoFcm!);
 
       if (!mounted) {
         return;
@@ -51,6 +48,21 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
         builder: (_) => const LocalizacaoAtualPage(),
       ),
     );
+  }
+
+  void _inicializarNotificacoesEmBackground(String topico) {
+    unawaited(() async {
+      try {
+        await _servicoNotificacoes
+            .inicializar()
+            .timeout(const Duration(seconds: 8));
+        await _servicoNotificacoes
+            .inscreverNoTopico(topico)
+            .timeout(const Duration(seconds: 8));
+      } catch (_) {
+        // Notificacoes sao opcionais para abrir o app offline.
+      }
+    }());
   }
 
   @override

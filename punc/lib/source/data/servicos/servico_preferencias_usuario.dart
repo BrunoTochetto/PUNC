@@ -19,17 +19,20 @@ class PreferenciasUsuario {
     required this.configurado,
     this.topicoFcm,
     this.idDispositivo,
+    this.cep,
   });
 
   final bool configurado;
   final String? topicoFcm;
   final String? idDispositivo;
+  final String? cep;
 }
 
 class ServicoPreferenciasUsuario {
   static const _chaveConfigurado = 'usuario_configurado';
   static const _chaveTopico = 'topico_fcm';
   static const _chaveIdDispositivo = 'id_dispositivo';
+  static const _chaveCep = 'cep_usuario';
   static final RegExp _macRegex = RegExp(
     r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$',
   );
@@ -40,6 +43,7 @@ class ServicoPreferenciasUsuario {
       configurado: prefs.getBool(_chaveConfigurado) ?? false,
       topicoFcm: prefs.getString(_chaveTopico),
       idDispositivo: prefs.getString(_chaveIdDispositivo),
+      cep: prefs.getString(_chaveCep),
     );
   }
 
@@ -51,6 +55,11 @@ class ServicoPreferenciasUsuario {
     await prefs.setBool(_chaveConfigurado, true);
     await prefs.setString(_chaveTopico, topico);
     await prefs.setString(_chaveIdDispositivo, idDispositivo);
+  }
+
+  Future<void> salvarCep(String cep) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_chaveCep, cep);
   }
 
   Future<IdentificacaoDispositivo> obterIdentificacaoDispositivo() async {

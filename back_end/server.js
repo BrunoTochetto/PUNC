@@ -13,6 +13,7 @@ import gerenteRoutes from './src/routes/gerente.js';
 import motoristaRoutes from './src/routes/motorista.js';
 import mapaRoutes from './src/routes/mapa.js';
 import horarioColetaRoutes from './src/routes/horarioColeta.js';
+import { notificacoes } from './src/services/notificacoes.js';
 // import './src/services/websocket.js';
 
 const app = express();

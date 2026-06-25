@@ -3,13 +3,14 @@
 class ApiConfig {
   ApiConfig._();
 
-  static const String baseUrl = String.fromEnvironment(
-    'PUNC_API_URL',
-    defaultValue: 'http://192.168.0.34:2000',
-  );
+  static String get baseUrl {
+    return String.fromEnvironment('PUNC_API_URL',
+    defaultValue: 'http://192.168.0.34:1025');
+  }
 
-  static const String wsUrl = String.fromEnvironment(
-    'PUNC_WS_URL',
-    defaultValue: 'ws://192.168.0.34:8080',
-  );
+  static String get wsUrl {
+    const url = String.fromEnvironment('PUNC_WS_URL');
+    if (url.isNotEmpty) return url;
+    return 'ws://localhost:8080';
+  }
 }

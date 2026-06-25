@@ -5,6 +5,7 @@ class CardCrono extends StatelessWidget {
   final String time;
   final String type;
   final Color iconColor;
+  final VoidCallback? onTap;
 
   const CardCrono({
     super.key,
@@ -12,75 +13,83 @@ class CardCrono extends StatelessWidget {
     required this.time,
     required this.type,
     required this.iconColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color corCardBranco = colorScheme.surface; 
+    final Color corCardBranco = colorScheme.surface;
     final Color corBordaCinza = colorScheme.onSurface;
     final Color corTextoPrincipal = colorScheme.onSurface;
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: corCardBranco, // Forçado para Branco Puro
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: corBordaCinza), // Adicionada borda cinza clara
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  day,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: corTextoPrincipal,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Coleta: $time',
-                  style: TextStyle(
-                    color: corTextoPrincipal.withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Icon(
-                Icons.recycling,
-                color: iconColor,
-                size: 32,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                type,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  color: corTextoPrincipal,
-                ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: corCardBranco,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: corBordaCinza),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-        ],
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      day,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: corTextoPrincipal,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Coleta: $time',
+                      style: TextStyle(
+                        color: corTextoPrincipal.withValues(alpha: 0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.recycling,
+                    color: iconColor,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    type,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                      color: corTextoPrincipal,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

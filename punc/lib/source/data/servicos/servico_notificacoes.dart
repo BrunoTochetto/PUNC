@@ -119,6 +119,32 @@ class ServicoNotificacoes {
     }
   }
 
+  Future<void> reiniciarTopico(String topico) async {
+    final topicoNormalizado = topico.trim();
+    if (topicoNormalizado.isEmpty) {
+      throw const NotificacaoExcecao(
+        'Topico FCM invalido ou vazio para reinicio.',
+      );
+    }
+
+    await inicializar().timeout(const Duration(seconds: 8));
+
+    final topicoAnterior = _topicoAtual;
+    _topicoAtual = null;
+
+    if (topicoAnterior != null) {
+      try {
+        await _messaging
+            .unsubscribeFromTopic(topicoAnterior)
+            .timeout(const Duration(seconds: 6));
+      } catch (_) {
+        // Segue para nova inscricao mesmo se o cancelamento falhar.
+      }
+    }
+
+    await _inscreverTopico(topicoNormalizado);
+  }
+
   static String topicoParaCadastro(ResultadoCadastroUsuario cadastro) {
     final topicoBackend = cadastro.usuario.celula.topico?.trim();
     if (topicoBackend != null && topicoBackend.isNotEmpty) {
@@ -153,13 +179,19 @@ class ServicoNotificacoes {
       return;
     }
 
-    await _messaging.getToken();
+    try {
+      await _messaging.getToken().timeout(const Duration(seconds: 6));
+    } catch (_) {
+      // Inscricao em topico pode falhar offline.
+    }
 
     if (_topicoAtual != null) {
       await _messaging.unsubscribeFromTopic(_topicoAtual!);
     }
 
-    await _messaging.subscribeToTopic(topicoNormalizado);
+    await _messaging
+        .subscribeToTopic(topicoNormalizado)
+        .timeout(const Duration(seconds: 6));
     _topicoAtual = topicoNormalizado;
   }
 
@@ -167,31 +199,38 @@ class ServicoNotificacoes {
     final configuracoes = await _messaging.requestPermission();
 
     if (configuracoes.authorizationStatus == AuthorizationStatus.denied) {
-      throw const NotificacaoExcecao(
-        'Permissao de notificacoes negada pelo usuario.',
-      );
+      // Permissao negada nao deve impedir o uso offline do app.
+      return;
     }
   }
 
   Future<void> _aguardarTokenApnsSeNecessario() async {
+    const timeoutToken = Duration(seconds: 6);
+
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.macOS) {
-      await _messaging.getToken();
+      try {
+        await _messaging.getToken().timeout(timeoutToken);
+      } catch (_) {
+        // Sem internet o token pode falhar; o app segue normalmente.
+      }
       return;
     }
 
-    for (var tentativa = 0; tentativa < 5; tentativa++) {
-      final apnsToken = await _messaging.getAPNSToken();
-      if (apnsToken != null) {
-        await _messaging.getToken();
-        return;
+    for (var tentativa = 0; tentativa < 3; tentativa++) {
+      try {
+        final apnsToken = await _messaging
+            .getAPNSToken()
+            .timeout(const Duration(seconds: 2));
+        if (apnsToken != null) {
+          await _messaging.getToken().timeout(timeoutToken);
+          return;
+        }
+      } catch (_) {
+        // Continua tentando enquanto houver tempo.
       }
       await Future<void>.delayed(const Duration(seconds: 1));
     }
-
-    throw const NotificacaoExcecao(
-      'Token APNS indisponivel para registrar notificacoes.',
-    );
   }
 
   void _processarMensagem(RemoteMessage message) {
