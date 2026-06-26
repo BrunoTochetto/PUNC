@@ -121,10 +121,6 @@ async function status(req, res){
     logErro('Erro ao atualizar status do motorista', e);
     res.status(500).json({ erro: 'Erro ao atualizar status do motorista.' });
   }
-
-  function _normalizarStatus(status) {
-    return status.toLowerCase().replace(/[_-]/g, ' ').trim();
-  }
 };
 
 /*
@@ -234,4 +230,155 @@ async function acharTodosEmRaio(req, res){
   }
 }
 
-export {ativos, status, localizacao, acharTodosEmRaio}
+/*
+* [Recebe]: mac
+* [Retorna]: dados do motorista se o dispositivo estiver cadastrado por um gerente.
+*/
+async function identificarPorMac(req, res) {
+  try {
+    const { mac } = req.body;
+
+    if (!mac) {
+      return res.status(400).json({ erro: 'MAC é obrigatório.' });
+    }
+
+    let macAddress;
+    try {
+      macAddress = new MACAddress(mac);
+    } catch (err) {
+      return res.status(400).json({ erro: err.message });
+    }
+
+    const resultado = await querry(
+      `SELECT
+        m.id AS id_motorista,
+        m.nome_dispositivo,
+        m.mac,
+        m.identificacao_caminhao,
+        m.tipo_lixo,
+        m.id_gerente,
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM trajetorias t
+            WHERE t.id_motorista = m.id
+            AND t.tempo_fim IS NULL
+          ) THEN 'Em percurso'
+          ELSE 'Inativo'
+        END AS status
+      FROM motoristas m
+      WHERE UPPER(REPLACE(REPLACE(m.mac, '-', ':'), ' ', '')) = $1
+      LIMIT 1`,
+      [macAddress.padrao]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Dispositivo não cadastrado como motorista.' });
+    }
+
+    return res.status(200).json({ motorista: resultado.rows[0] });
+  } catch (e) {
+    logErro('Erro ao identificar motorista por MAC', e);
+    res.status(500).json({ erro: 'Erro ao identificar motorista.' });
+  }
+}
+
+/*
+* [Recebe]: id_motorista (param), mac, status (Em percurso ou Inativo)
+* [Retorna]: trajetoria criada ou finalizada
+*
+* Permite que o próprio dispositivo do motorista controle o percurso
+* validando o MAC, sem autenticação de gerente.
+*/
+async function percursoDispositivo(req, res) {
+  try {
+    const id_motorista = Number(req.params.id);
+    const { mac, status } = req.body;
+    const statusSolicitado = _normalizarStatus((status || '').toString());
+
+    if (!id_motorista || Number.isNaN(id_motorista)) {
+      return res.status(400).json({ erro: 'ID do motorista inválido.' });
+    }
+    if (!mac) {
+      return res.status(400).json({ erro: 'MAC é obrigatório.' });
+    }
+    if (!statusSolicitado) {
+      return res.status(400).json({ erro: 'Status é obrigatório.' });
+    }
+
+    let macAddress;
+    try {
+      macAddress = new MACAddress(mac);
+    } catch (err) {
+      return res.status(400).json({ erro: err.message });
+    }
+
+    const motoristaResultado = await querry(
+      `SELECT id, tipo_lixo FROM motoristas
+       WHERE id = $1
+       AND UPPER(REPLACE(REPLACE(mac, '-', ':'), ' ', '')) = $2`,
+      [id_motorista, macAddress.padrao]
+    );
+    if (motoristaResultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Motorista não encontrado ou MAC não confere.' });
+    }
+
+    const { tipo_lixo } = motoristaResultado.rows[0];
+
+    if (statusSolicitado === 'em percurso') {
+      const trajetoriaAberta = await querry(
+        `SELECT id FROM trajetorias WHERE id_motorista = $1 AND tempo_fim IS NULL LIMIT 1`,
+        [id_motorista]
+      );
+      if (trajetoriaAberta.rows.length > 0) {
+        return res.status(409).json({ erro: 'Já existe um trajeto em andamento para este motorista.' });
+      }
+
+      const resultado = await querry(
+        `INSERT INTO trajetorias (id_motorista, tipo_lixo)
+         VALUES ($1, $2)
+         RETURNING id, id_motorista, tipo_lixo, tempo_comeco, tempo_fim`,
+        [id_motorista, tipo_lixo || null]
+      );
+      return res.status(201).json({
+        mensagem: 'Trajetória iniciada.',
+        trajetoria: resultado.rows[0],
+      });
+    }
+
+    if (statusSolicitado === 'inativo') {
+      const resultado = await querry(
+        `UPDATE trajetorias
+         SET tempo_fim = NOW()
+         WHERE id_motorista = $1
+         AND tempo_fim IS NULL
+         RETURNING id, id_motorista, tipo_lixo, tempo_comeco, tempo_fim`,
+        [id_motorista]
+      );
+      if (resultado.rows.length === 0) {
+        return res.status(404).json({ erro: 'Nenhum trajeto em andamento encontrado para este motorista.' });
+      }
+      return res.status(200).json({
+        mensagem: 'Trajetória finalizada.',
+        trajetoria: resultado.rows[0],
+      });
+    }
+
+    return res.status(400).json({ erro: 'Status inválido. Use "Em percurso" ou "Inativo".' });
+  } catch (e) {
+    logErro('Erro ao atualizar percurso do dispositivo', e);
+    res.status(500).json({ erro: 'Erro ao atualizar percurso do motorista.' });
+  }
+}
+
+function _normalizarStatus(status) {
+  return status.toLowerCase().replace(/[_-]/g, ' ').trim();
+}
+
+export {
+  ativos,
+  status,
+  localizacao,
+  acharTodosEmRaio,
+  identificarPorMac,
+  percursoDispositivo,
+}

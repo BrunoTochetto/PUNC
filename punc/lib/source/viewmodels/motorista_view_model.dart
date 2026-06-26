@@ -33,12 +33,17 @@ class MotoristaViewModel extends ChangeNotifier {
 
   // Estado do motorista
   int? _idMotorista;
+  String? _macDispositivo;
+  String? _nomeDispositivo;
   StatusMotorista _statusMotorista = StatusMotorista.inativo;
   String? _mensagemErro;
   bool _estaSincronizando = false;
 
   // Getters para acesso público
   int? get idMotorista => _idMotorista;
+  String? get macDispositivo => _macDispositivo;
+  String? get nomeDispositivo => _nomeDispositivo;
+  bool get ehMotorista => _idMotorista != null;
   StatusMotorista get statusMotorista => _statusMotorista;
   String? get mensagemErro => _mensagemErro;
   bool get estaSincronizando => _estaSincronizando;
@@ -60,19 +65,58 @@ class MotoristaViewModel extends ChangeNotifier {
     );
   }
 
-  /// Define o ID do motorista autenticado.
-  ///
-  /// Deve ser chamado após autenticação do usuário (motorista).
-  void definirMotorista(int idMotorista) {
+  /// Define o motorista autenticado pelo dispositivo.
+  void definirMotorista({
+    required int idMotorista,
+    required String macDispositivo,
+    String? nomeDispositivo,
+    String? statusRemoto,
+  }) {
     _idMotorista = idMotorista;
+    _macDispositivo = macDispositivo;
+    _nomeDispositivo = nomeDispositivo;
+    _statusMotorista = _statusDeTexto(statusRemoto);
     notifyListeners();
+  }
+
+  /// Restaura coleta de localização se o motorista já estava em percurso.
+  Future<void> sincronizarEstadoInicial() async {
+    if (_idMotorista == null || _macDispositivo == null) return;
+    if (!estaEmPercurso) return;
+
+    final sucesso = await _servicoLocalizacao.iniciarColeta(
+      idMotorista: _idMotorista!,
+    );
+    if (!sucesso) {
+      _mensagemErro ??=
+          'Não foi possível retomar o envio de localização.';
+      notifyListeners();
+    }
+  }
+
+  void limparMotorista() {
+    _servicoLocalizacao.pararColeta();
+    _idMotorista = null;
+    _macDispositivo = null;
+    _nomeDispositivo = null;
+    _statusMotorista = StatusMotorista.inativo;
+    _mensagemErro = null;
+    notifyListeners();
+  }
+
+  StatusMotorista _statusDeTexto(String? status) {
+    final texto = status?.toLowerCase() ?? '';
+    if (texto.contains('percurso')) {
+      return StatusMotorista.emPercurso;
+    }
+    return StatusMotorista.inativo;
   }
 
   /// Muda o status do motorista para "Em percurso" e inicia a coleta de localização.
   ///
   /// Retorna true se conseguir mudar o status e iniciar coleta, false caso contrário.
   Future<bool> iniciarPercurso() async {
-    if (_idMotorista == null) {
+    if (_idMotorista == null || _macDispositivo == null) {
       _mensagemErro = 'Motorista não identificado.';
       notifyListeners();
       return false;
@@ -81,23 +125,27 @@ class MotoristaViewModel extends ChangeNotifier {
     try {
       _mensagemErro = null;
 
-      // Iniciar coleta de localização
+      await _repositorioMotorista.atualizarPercursoDispositivo(
+        idMotorista: _idMotorista!,
+        mac: _macDispositivo!,
+        status: 'Em percurso',
+      );
+
       final sucesso = await _servicoLocalizacao.iniciarColeta(
         idMotorista: _idMotorista!,
       );
 
       if (!sucesso) {
+        await _repositorioMotorista.atualizarPercursoDispositivo(
+          idMotorista: _idMotorista!,
+          mac: _macDispositivo!,
+          status: 'Inativo',
+        );
         _mensagemErro ??=
             'Não foi possível iniciar coleta de localização.';
         notifyListeners();
         return false;
       }
-
-      // Atualizar status no backend
-      await _repositorioMotorista.atualizarStatus(
-        idMotorista: _idMotorista!,
-        status: 'Em percurso',
-      );
 
       _statusMotorista = StatusMotorista.emPercurso;
       notifyListeners();
@@ -116,7 +164,7 @@ class MotoristaViewModel extends ChangeNotifier {
   ///
   /// Retorna true se conseguir mudar o status, false caso contrário.
   Future<bool> finalizarPercurso() async {
-    if (_idMotorista == null) {
+    if (_idMotorista == null || _macDispositivo == null) {
       _mensagemErro = 'Motorista não identificado.';
       notifyListeners();
       return false;
@@ -125,12 +173,11 @@ class MotoristaViewModel extends ChangeNotifier {
     try {
       _mensagemErro = null;
 
-      // Parar coleta de localização
       _servicoLocalizacao.pararColeta();
 
-      // Atualizar status no backend
-      await _repositorioMotorista.atualizarStatus(
+      await _repositorioMotorista.atualizarPercursoDispositivo(
         idMotorista: _idMotorista!,
+        mac: _macDispositivo!,
         status: 'Inativo',
       );
 

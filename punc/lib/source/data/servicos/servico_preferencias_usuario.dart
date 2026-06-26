@@ -20,12 +20,16 @@ class PreferenciasUsuario {
     this.topicoFcm,
     this.idDispositivo,
     this.cep,
+    this.ehMotorista = false,
+    this.idMotorista,
   });
 
   final bool configurado;
   final String? topicoFcm;
   final String? idDispositivo;
   final String? cep;
+  final bool ehMotorista;
+  final int? idMotorista;
 }
 
 class ServicoPreferenciasUsuario {
@@ -33,6 +37,8 @@ class ServicoPreferenciasUsuario {
   static const _chaveTopico = 'topico_fcm';
   static const _chaveIdDispositivo = 'id_dispositivo';
   static const _chaveCep = 'cep_usuario';
+  static const _chaveEhMotorista = 'eh_motorista';
+  static const _chaveIdMotorista = 'id_motorista';
   static final RegExp _macRegex = RegExp(
     r'^([0-9A-F]{2}:){5}[0-9A-F]{2}$',
   );
@@ -44,7 +50,23 @@ class ServicoPreferenciasUsuario {
       topicoFcm: prefs.getString(_chaveTopico),
       idDispositivo: prefs.getString(_chaveIdDispositivo),
       cep: prefs.getString(_chaveCep),
+      ehMotorista: prefs.getBool(_chaveEhMotorista) ?? false,
+      idMotorista: prefs.getInt(_chaveIdMotorista),
     );
+  }
+
+  Future<void> salvarModoMotorista({
+    required int idMotorista,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_chaveEhMotorista, true);
+    await prefs.setInt(_chaveIdMotorista, idMotorista);
+  }
+
+  Future<void> limparModoMotorista() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_chaveEhMotorista, false);
+    await prefs.remove(_chaveIdMotorista);
   }
 
   Future<void> salvarConfiguracao({

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../data/modelos/motorista.dart';
 import '../viewmodels/mapa_view_model.dart';
 import '../widgets/estado_pagina.dart';
+import '../widgets/painel_controle_motorista.dart';
 import '../widgets/punc_app_shell.dart';
+import '../viewmodels/motorista_view_model.dart';
 
 class MapaGruposPage extends StatefulWidget {
   const MapaGruposPage({super.key});
@@ -27,40 +30,117 @@ class _MapaGruposPageState extends State<MapaGruposPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ehMotorista = context.watch<MotoristaViewModel>().ehMotorista;
+
     return PuncAppShell(
       selectedRoute: '/mapa',
       body: FutureBuilder<List<LocalizacaoMotorista>>(
         future: _trajetosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const EstadoCarregando();
+            return _MapaComPainelMotorista(
+              ehMotorista: ehMotorista,
+              child: const EstadoCarregando(),
+            );
           }
 
           if (snapshot.hasError) {
-            return EstadoErro(
-              mensagem: 'Não foi possível carregar os caminhões no mapa.',
-              onTentarNovamente: () => setState(_carregar),
+            return _MapaComPainelMotorista(
+              ehMotorista: ehMotorista,
+              child: EstadoErro(
+                mensagem: 'Não foi possível carregar os caminhões no mapa.',
+                onTentarNovamente: () => setState(_carregar),
+              ),
             );
           }
 
           final trajetos = snapshot.data ?? [];
-          if (trajetos.isEmpty) {
+          if (trajetos.isEmpty && !ehMotorista) {
             return const EstadoVazio(
               mensagem: 'Nenhum caminhão em percurso neste momento.',
             );
           }
 
-          return _MapaConteudo(trajetos: trajetos);
+          return _MapaComPainelMotorista(
+            ehMotorista: ehMotorista,
+            child: trajetos.isEmpty
+                ? _MapaMotoristaVazio()
+                : _MapaConteudo(
+                    trajetos: trajetos,
+                    ocultarRodape: ehMotorista,
+                  ),
+          );
         },
       ),
     );
   }
 }
 
+class _MapaMotoristaVazio extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Stack(
+      children: [
+        Container(
+          color: colorScheme.surface,
+          child: Center(
+            child: Icon(
+              Icons.map_outlined,
+              size: 220,
+              color: colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
+          ),
+        ),
+        const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Ative a rota abaixo para começar a enviar sua localização.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MapaComPainelMotorista extends StatelessWidget {
+  const _MapaComPainelMotorista({
+    required this.ehMotorista,
+    required this.child,
+  });
+
+  final bool ehMotorista;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        if (ehMotorista)
+          const Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: PainelControleMotorista(),
+          ),
+      ],
+    );
+  }
+}
+
 class _MapaConteudo extends StatelessWidget {
-  const _MapaConteudo({required this.trajetos});
+  const _MapaConteudo({
+    required this.trajetos,
+    this.ocultarRodape = false,
+  });
 
   final List<LocalizacaoMotorista> trajetos;
+  final bool ocultarRodape;
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +190,12 @@ class _MapaConteudo extends StatelessWidget {
             ),
           );
         }),
-        Positioned(
-          left: 18,
-          right: 18,
-          bottom: 18,
-          child: Card(
+        if (!ocultarRodape)
+          Positioned(
+            left: 18,
+            right: 18,
+            bottom: 18,
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Row(

@@ -6,6 +6,10 @@ const router = express.Router();
 
 router.get('/ativos', controller.ativos);
 
+router.get('/identificar', controller.identificarPorMac);
+
+router.patch('/:id/percurso', controller.percursoDispositivo);
+
 router.patch('/:id/status', autenticacaoNecessaria, controller.status);
 
 router.post('/:id/localizacao', controller.localizacao);

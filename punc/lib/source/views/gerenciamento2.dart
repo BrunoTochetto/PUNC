@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/modelos/gerente.dart';
+import '../data/servicos/servico_preferencias_usuario.dart';
 import '../domain/casodeuso/gerente/cadastrar_motorista.dart';
 import '../widgets/punc_app_shell.dart';
 import '../widgets/section_header.dart';
@@ -20,9 +21,27 @@ class _Gerenciamento2PageState extends State<Gerenciamento2Page> {
   final _placaController = TextEditingController();
   final _modeloController = TextEditingController();
   final _casodeUso = CadastrarMotorista();
+  final _servicoPreferencias = ServicoPreferenciasUsuario();
 
   String _selectedStatus = 'Disponível';
   bool _salvando = false;
+  bool _carregandoMac = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarMacDispositivo();
+  }
+
+  Future<void> _carregarMacDispositivo() async {
+    final identificacao =
+        await _servicoPreferencias.obterIdentificacaoDispositivo();
+    if (!mounted) return;
+    setState(() {
+      _numeroController.text = identificacao.mac;
+      _carregandoMac = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -133,8 +152,11 @@ class _Gerenciamento2PageState extends State<Gerenciamento2Page> {
                     ),
                     _buildTextField(
                       controller: _numeroController,
-                      label: 'Número/ID do caminhão',
+                      label: 'ID do dispositivo (MAC)',
                       icon: Icons.tag_outlined,
+                      helperText:
+                          'Use o ID exibido no celular do motorista. '
+                          'Ele identifica o aparelho no sistema.',
                     ),
                     _buildTextField(
                       controller: _placaController,
@@ -211,14 +233,16 @@ class _Gerenciamento2PageState extends State<Gerenciamento2Page> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    String? helperText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: controller,
-        enabled: !_salvando,
+        enabled: !_salvando && !_carregandoMac,
         decoration: InputDecoration(
           labelText: label,
+          helperText: helperText,
           prefixIcon: Icon(icon, color: const Color(0xFF5E996E)),
           filled: true,
           fillColor: Colors.grey[50],

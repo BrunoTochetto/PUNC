@@ -1,4 +1,5 @@
 import '../api_client.dart';
+import '/../nucleo/erros/falha_api.dart';
 import '../modelos/gerente.dart';
 import '../modelos/motorista.dart';
 
@@ -21,6 +22,41 @@ class RepositorioMotorista {
     return lista
         .map((item) => MotoristaGerente.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  /// GET /api/motorista/identificar
+  Future<MotoristaGerente?> identificarPorMac({required String mac}) async {
+    try {
+      final resposta = await _client.get(
+        '/api/motorista/identificar',
+        corpo: {'mac': mac},
+      );
+
+      final motorista = resposta['motorista'];
+      if (motorista == null) return null;
+
+      return MotoristaGerente.fromJson(motorista as Map<String, dynamic>);
+    } on FalhaApi catch (e) {
+      if (e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  /// PATCH /api/motorista/:id/percurso
+  Future<ResultadoStatusMotorista> atualizarPercursoDispositivo({
+    required int idMotorista,
+    required String mac,
+    required String status,
+  }) async {
+    final resposta = await _client.patch(
+      '/api/motorista/$idMotorista/percurso',
+      corpo: {
+        'mac': mac,
+        'status': status,
+      },
+    );
+
+    return ResultadoStatusMotorista.fromJson(resposta);
   }
 
   /// PATCH /api/motorista/:id/status
