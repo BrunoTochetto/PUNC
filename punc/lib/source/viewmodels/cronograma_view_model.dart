@@ -89,6 +89,18 @@ class CronogramaViewModel {
         );
       }
 
+      final hashNovo = ServicoCacheCronograma.hashHorarios(resultado);
+      final cacheAtual = await _cache.carregar(cepFinal);
+      if (cacheAtual != null && cacheAtual.hash == hashNovo) {
+        debugPrint('[PUNC cronograma] Nenhuma alteracao nos horarios');
+        return ResultadoCarregamentoCronograma(
+          horarios: cacheAtual.horarios,
+          cep: cepFinal,
+          doCache: true,
+          ultimaSincronizacao: cacheAtual.sincronizadoEm,
+        );
+      }
+
       await _cache.salvar(cep: cepFinal, horarios: resultado);
       final cacheAtualizado = await _cache.carregar(cepFinal);
 

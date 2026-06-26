@@ -5,8 +5,9 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 
 dotenv.config({ path: fileURLToPath(new URL('./.env', import.meta.url)) });
-import { logInfo } from './src/services/logErrors.js';
+import { logErro, logInfo } from './src/services/logErrors.js';
 import { initFirebase } from './src/services/firebase.js';
+import { finalizarPercursosAtivos } from './src/services/finalizarPercursosAtivos.js';
 
 import usuarioRoutes from './src/routes/usuario.js';
 import gerenteRoutes from './src/routes/gerente.js';
@@ -37,7 +38,17 @@ app.get('/status', (req, res) => {
 
 
 const PORT = process.env.PORT || 1025; // Desculpa Heitor, não sabia que não podia 1000
-app.listen(PORT, () => {
-    // console.log(`Server rodando na porta: ${PORT}`);
-    logInfo(`Server rodando na porta: ${PORT}`);
-});
+
+async function iniciarServidor() {
+    try {
+        await finalizarPercursosAtivos();
+    } catch (erro) {
+        logErro('Erro ao finalizar percursos ativos na inicialização', erro);
+    }
+
+    app.listen(PORT, () => {
+        logInfo(`Server rodando na porta: ${PORT}`);
+    });
+}
+
+iniciarServidor();

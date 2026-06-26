@@ -1,35 +1,91 @@
 import 'package:flutter/material.dart';
 
+import '../data/modelos/tipo_lixo.dart';
+
+/// Seletor de tipo de coleta (apenas orgânico ou reciclado).
 class SeletorTipoColeta extends StatelessWidget {
-  const SeletorTipoColeta({super.key});
+  const SeletorTipoColeta({
+    super.key,
+    required this.valorSelecionado,
+    required this.onChanged,
+    this.habilitado = true,
+  });
+
+  final String? valorSelecionado;
+  final ValueChanged<String> onChanged;
+  final bool habilitado;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildOpcao('Reciclável', Icons.recycling, Colors.green, true),
-        _buildOpcao('Orgânico', Icons.apple, Colors.brown, false),
-        _buildOpcao('Rejeitos', Icons.delete_outline, Colors.grey, false),
+        Expanded(
+          child: _buildOpcao(
+            valor: TipoLixo.organico,
+            label: TipoLixo.rotulos[TipoLixo.organico]!,
+            icon: Icons.eco_outlined,
+            color: const Color(0xFF8B4513),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildOpcao(
+            valor: TipoLixo.reciclado,
+            label: TipoLixo.rotulos[TipoLixo.reciclado]!,
+            icon: Icons.recycling,
+            color: const Color(0xFF4AA564),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildOpcao(String label, IconData icon, Color color, bool isSelected) {
-    return Container(
-      width: 80,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withValues(alpha: 0.2) : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isSelected ? color : Colors.grey.shade300),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 10, color: isSelected ? color : Colors.grey)),
-        ],
+  Widget _buildOpcao({
+    required String valor,
+    required String label,
+    required IconData icon,
+    required Color color,
+  }) {
+    final selecionado = valorSelecionado == valor;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: habilitado ? () => onChanged(valor) : null,
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: selecionado ? color.withValues(alpha: 0.15) : null,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selecionado ? color : Colors.grey.shade300,
+              width: selecionado ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: habilitado ? color : color.withValues(alpha: 0.45),
+                size: 24,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selecionado ? FontWeight.w700 : FontWeight.w500,
+                  color: habilitado
+                      ? (selecionado ? color : Colors.grey.shade700)
+                      : Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

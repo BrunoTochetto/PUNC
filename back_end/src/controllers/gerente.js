@@ -108,30 +108,44 @@ async function listarMotoristas(req, res){
 };
 
 /*
-* [Recebe]: nome_dispositivo, mac, id_gerente
-* [Retorna]: id (próprio), id_gerente
+* [Recebe]: mac, id_gerente
+* [Retorna]: id (próprio), nome_dispositivo, mac, id_gerente, data_criacao
 */
 async function criarMotorista(req, res){
   try {
-    const { id_gerente, nome_dispositivo, mac } = req.body;
+    const { id_gerente, mac } = req.body;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
     }
 
-    if (!nome_dispositivo || !mac) {
-      return res.status(400).json({ erro: 'Nome do dispositivo e MAC são obrigatórios.' });
+    if (!mac) {
+      return res.status(400).json({ erro: 'MAC é obrigatório.' });
     }
 
+    // Buscar usuário no banco pelo MAC
+    const usuarioExistente = await querry(
+      'SELECT id, nome_dispositivo FROM usuarios WHERE mac = $1',
+      [mac]
+    );
+
+    if (usuarioExistente.rows.length === 0) {
+      return res.status(404).json({ erro: 'Usuário com este MAC não encontrado.' });
+    }
+
+    const usuario = usuarioExistente.rows[0];
+
+    // Verificar se já existe motorista com este MAC para este gerente
     const duplicado = await querry(
-      'SELECT id FROM motoristas AND id_gerente = $2',
+      'SELECT id FROM motoristas WHERE mac = $1 AND id_gerente = $2',
       [mac, Number(id_gerente)]
     );
 
     if (duplicado.rows.length > 0) {
-      return res.status(409).json({ erro: 'Motorista com este MAC já cadastrado.' });
+      return res.status(409).json({ erro: 'Motorista com este MAC já cadastrado para este gerente.' });
     }
 
+    // Criar motorista com as informações do usuário
     const inserirMotorista = `
       INSERT INTO motoristas (nome_dispositivo, mac, id_gerente)
       VALUES ($1, $2, $3)
@@ -139,11 +153,12 @@ async function criarMotorista(req, res){
     `;
 
     const resultado = await querry(inserirMotorista, [
-      nome_dispositivo,
+      usuario.nome_dispositivo,
       mac,
-      id_gerente,
+      Number(id_gerente)
     ]);
 
+    await logInfo(`Motorista criado com sucesso - ID: ${resultado.rows[0].id}, MAC: ${mac}, Gerente: ${id_gerente}`);
     res.status(201).json({ mensagem: 'Motorista criado com sucesso.', motorista: resultado.rows[0] });
   } catch (e) {
     logErro('Erro ao criar motorista', e);

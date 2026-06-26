@@ -264,18 +264,6 @@ class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
-                    TextButton.icon(
-                      onPressed: _reiniciando || !_podeReiniciarTopico
-                          ? null
-                          : _reiniciarAmbos,
-                      icon: const Icon(Icons.sync, size: 18),
-                      label: const Text('Reiniciar ambos'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
                     if (_reiniciando)
                       const Padding(
                         padding: EdgeInsets.only(left: 8),

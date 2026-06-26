@@ -2,6 +2,7 @@ import { logErro, logAviso } from '../services/logErrors.js';
 import { querry } from '../services/querry.js';
 import { Coordenadas } from '../models/coordenadas.js';
 import { MACAddress } from '../models/macAddress.js';
+import { notificacoes } from '../services/notificacoes.js';
 
 /*
 * [Recebe]: id_gerente
@@ -127,6 +128,51 @@ async function status(req, res){
 * [Recebe]: id_motorista (param), mac, latitude, longitude
 * [Retorna]: localização criada (vw_localizacoes_de_trajetos)
 */
+async function _notificarCelulasProximasAoMotorista({
+  idMotorista,
+  latitude,
+  longitude,
+  tipoLixo,
+  identificacaoCaminhao,
+}) {
+  if (!tipoLixo) {
+    await logAviso(
+      `Notificação ignorada: motorista ${idMotorista} sem tipo_lixo na trajetória.`,
+      null,
+    );
+    return;
+  }
+
+  try {
+    const raioM = Number(process.env.NOTIFICACAO_RAIO_M ?? 1000);
+    const resposta = await notificacoes.notificarCelulasEmRaio(
+      latitude,
+      longitude,
+      raioM,
+      {
+        tipoLixo,
+        dados: {
+          id_motorista: idMotorista,
+          identificacao_caminhao: identificacaoCaminhao ?? '',
+        },
+      },
+    );
+
+    if (!resposta.enviado && resposta.motivo === 'nenhuma_celula_elegivel') {
+      await logAviso(
+        `Nenhuma célula elegível para notificação no raio de ${raioM}m `
+          + `(intervalo ou sem usuários) para o motorista ${idMotorista}.`,
+        null,
+      );
+    }
+  } catch (erro) {
+    logErro(
+      `Erro ao notificar células da localização do motorista ${idMotorista}`,
+      erro,
+    );
+  }
+}
+
 async function localizacao(req, res){
   try {
     const id_motorista = Number(req.params.id);
@@ -160,7 +206,10 @@ async function localizacao(req, res){
     }
 
     const trajetoriaAberta = await querry(
-      `SELECT t.id AS id_trajetoria
+      `SELECT
+         t.id AS id_trajetoria,
+         t.tipo_lixo,
+         m.identificacao_caminhao
        FROM motoristas m
        JOIN trajetorias t ON t.id_motorista = m.id
        WHERE m.id = $1
@@ -175,7 +224,8 @@ async function localizacao(req, res){
       });
     }
 
-    const { id_trajetoria } = trajetoriaAberta.rows[0];
+    const { id_trajetoria, tipo_lixo, identificacao_caminhao } =
+      trajetoriaAberta.rows[0];
     const insercao = await querry(
       `INSERT INTO localizacao_trajetorias (id_trajetoria, geom_3857)
        VALUES ($1, ST_Transform(ST_SetSRID(ST_MakePoint($2, $3), 4326), 3857))
@@ -187,6 +237,14 @@ async function localizacao(req, res){
       `SELECT * FROM vw_localizacoes_de_trajetos WHERE id_localizacao = $1`,
       [insercao.rows[0].id]
     );
+
+    void _notificarCelulasProximasAoMotorista({
+      idMotorista: id_motorista,
+      latitude: coordenadas.latitude,
+      longitude: coordenadas.longitude,
+      tipoLixo: tipo_lixo,
+      identificacaoCaminhao: identificacao_caminhao,
+    });
 
     return res.status(201).json({
       mensagem: 'Localização registrada.',
@@ -292,7 +350,7 @@ async function identificarPorMac(req, res) {
 async function percursoDispositivo(req, res) {
   try {
     const id_motorista = Number(req.params.id);
-    const { mac, status } = req.body;
+    const { mac, status, tipo_lixo: tipoLixoBody, identificacao_caminhao: identificacaoBody } = req.body;
     const statusSolicitado = _normalizarStatus((status || '').toString());
 
     if (!id_motorista || Number.isNaN(id_motorista)) {
@@ -322,9 +380,32 @@ async function percursoDispositivo(req, res) {
       return res.status(404).json({ erro: 'Motorista não encontrado ou MAC não confere.' });
     }
 
-    const { tipo_lixo } = motoristaResultado.rows[0];
-
     if (statusSolicitado === 'em percurso') {
+      if (!tipoLixoBody) {
+        return res.status(400).json({
+          erro: 'tipo_lixo é obrigatório ao iniciar o percurso. Use "organico" ou "reciclado".',
+        });
+      }
+
+      let tipoLixoNormalizado;
+      try {
+        tipoLixoNormalizado = notificacoes.normalizarTipoLixo(tipoLixoBody);
+      } catch (err) {
+        return res.status(400).json({ erro: err.message });
+      }
+
+      const identificacaoCaminhao = (identificacaoBody || '').toString().trim();
+      if (!identificacaoCaminhao) {
+        return res.status(400).json({
+          erro: 'identificacao_caminhao é obrigatória ao iniciar o percurso.',
+        });
+      }
+      if (identificacaoCaminhao.length > 255) {
+        return res.status(400).json({
+          erro: 'identificacao_caminhao deve ter no máximo 255 caracteres.',
+        });
+      }
+
       const trajetoriaAberta = await querry(
         `SELECT id FROM trajetorias WHERE id_motorista = $1 AND tempo_fim IS NULL LIMIT 1`,
         [id_motorista]
@@ -333,11 +414,18 @@ async function percursoDispositivo(req, res) {
         return res.status(409).json({ erro: 'Já existe um trajeto em andamento para este motorista.' });
       }
 
+      await querry(
+        `UPDATE motoristas
+         SET tipo_lixo = $1, identificacao_caminhao = $2
+         WHERE id = $3`,
+        [tipoLixoNormalizado, identificacaoCaminhao, id_motorista]
+      );
+
       const resultado = await querry(
         `INSERT INTO trajetorias (id_motorista, tipo_lixo)
          VALUES ($1, $2)
          RETURNING id, id_motorista, tipo_lixo, tempo_comeco, tempo_fim`,
-        [id_motorista, tipo_lixo || null]
+        [id_motorista, tipoLixoNormalizado]
       );
       return res.status(201).json({
         mensagem: 'Trajetória iniciada.',

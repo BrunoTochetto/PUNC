@@ -105,7 +105,13 @@ class Notificacoes {
 
 	async enviarCelula(celulaX, celulaY, payload) {
 		const topico = this.celulaParaTopico(celulaX, celulaY);
-		return this.enviarTopico(topico, payload);
+		const resposta = await this.enviarTopico(topico, payload);
+
+		if (resposta.enviado) {
+			await this._marcarCelulasNotificadasPorCoordenada(celulaX, celulaY);
+		}
+
+		return resposta;
 	}
 
 	async criarTopicoCelula(celulaX, celulaY) {
@@ -219,14 +225,69 @@ class Notificacoes {
 		}
 	}
 
-	async _buscarCelulasEmRaio(latitude, longitude, raioM, apenasComUsuarios = true) {
+	_intervaloNotificacaoMin() {
+		const intervalo = Number(process.env.NOTIFICACAO_INTERVALO_MIN ?? 30);
+		return Number.isFinite(intervalo) && intervalo > 0 ? intervalo : 0;
+	}
+
+	async _marcarCelulasNotificadas(celulaIds) {
+		const ids = [...new Set(celulaIds.filter(Boolean))];
+		if (ids.length === 0) {
+			return;
+		}
+
+		await querry(
+			`UPDATE celulas
+			 SET ultima_atualizacao = NOW()
+			 WHERE id = ANY($1::bigint[])`,
+			[ids]
+		);
+	}
+
+	async _marcarCelulasNotificadasPorCoordenada(celulaX, celulaY) {
+		await querry(
+			`UPDATE celulas
+			 SET ultima_atualizacao = NOW()
+			 WHERE cell_x = $1
+			   AND cell_y = $2`,
+			[celulaX, celulaY]
+		);
+	}
+
+	async _buscarCelulasEmRaio(
+		latitude,
+		longitude,
+		raioM,
+		{ apenasComUsuarios = true, respeitarIntervalo = true } = {}
+	) {
+		const filtros = [];
+		const parametros = [latitude, longitude, raioM];
+
+		if (apenasComUsuarios) {
+			filtros.push('ac.quantidade_usuarios > 0');
+		}
+
+		const intervaloMin = respeitarIntervalo ? this._intervaloNotificacaoMin() : 0;
+		if (intervaloMin > 0) {
+			parametros.push(intervaloMin);
+			filtros.push(
+				`c.ultima_atualizacao <= NOW() - ($${parametros.length} * INTERVAL '1 minute')`
+			);
+		}
+
+		const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
 		const sql = `
-			SELECT celula_x, celula_y, quantidade_usuarios
-			FROM achar_celulas_em_raio($1, $2, $3)
-			${apenasComUsuarios ? 'WHERE quantidade_usuarios > 0' : ''}
+			SELECT
+				ac.celula_x,
+				ac.celula_y,
+				ac.celula_id,
+				ac.quantidade_usuarios
+			FROM achar_celulas_em_raio($1, $2, $3) ac
+			JOIN celulas c ON c.id = ac.celula_id
+			${whereClause}
 		`;
 
-		const resultado = await querry(sql, [latitude, longitude, raioM]);
+		const resultado = await querry(sql, parametros);
 		return resultado.rows;
 	}
 
@@ -235,17 +296,41 @@ class Notificacoes {
 		longitude,
 		raioM,
 		payload,
-		{ apenasComUsuarios = true } = {}
+		{ apenasComUsuarios = true, respeitarIntervalo = true } = {}
 	) {
-		const celulas = await this._buscarCelulasEmRaio(latitude, longitude, raioM, apenasComUsuarios);
-		const topicos = celulas.map(({ celula_x, celula_y }) => this.celulaParaTopico(celula_x, celula_y));
+		const celulas = await this._buscarCelulasEmRaio(latitude, longitude, raioM, {
+			apenasComUsuarios,
+			respeitarIntervalo,
+		});
+		const topicos = celulas.map(({ celula_x, celula_y }) =>
+			this.celulaParaTopico(celula_x, celula_y)
+		);
 
 		if (topicos.length === 0) {
-			return { enviado: false, motivo: 'nenhuma_celula_encontrada', resultados: [] };
+			return {
+				enviado: false,
+				motivo: 'nenhuma_celula_elegivel',
+				resultados: [],
+			};
 		}
 
 		const resposta = await this.enviarTopicos(topicos, payload);
-		return { ...resposta, celulasNotificadas: celulas.length };
+
+		const celulasEnviadas = (resposta.resultados ?? [])
+			.map((resultado, indice) =>
+				resultado.enviado ? celulas[indice]?.celula_id : null
+			)
+			.filter(Boolean);
+
+		if (celulasEnviadas.length > 0) {
+			await this._marcarCelulasNotificadas(celulasEnviadas);
+		}
+
+		return {
+			...resposta,
+			celulasElegiveis: celulas.length,
+			celulasNotificadas: celulasEnviadas.length,
+		};
 	}
 }
 

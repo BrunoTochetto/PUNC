@@ -7,7 +7,7 @@ import { querry } from '../services/querry.js';
 */
 async function emPercurso(req, res) {
   try {
-    const id_gerente = req.body.id_gerente ? Number(req.body.id_gerente) : undefined;
+    const id_gerente = req.params.id_gerente ? Number(req.params.id_gerente) : undefined;
 
     let sql = `
       SELECT *

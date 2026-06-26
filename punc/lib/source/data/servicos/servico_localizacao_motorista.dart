@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../repositorios/repositorio_motorista.dart';
 import 'servico_localizacao.dart';
@@ -20,13 +22,6 @@ typedef OnEstadoMudou = void Function(EstadoLocalizacaoMotorista novoEstado);
 typedef OnErro = void Function(String mensagem);
 
 /// Serviço responsável por gerenciar a coleta e envio periódico de localização do motorista.
-///
-/// Responsabilidades:
-/// - Iniciar/parar a coleta de localização baseado no status do motorista
-/// - Obter localização em intervalos regulares (~30 segundos)
-/// - Enviar localização ao backend
-/// - Tratar erros de permissão, GPS e rede
-/// - Notificar mudanças de estado e erros através de callbacks
 class ServicoLocalizacaoMotorista {
   ServicoLocalizacaoMotorista({
     ServicoLocalizacao? servicoLocalizacao,
@@ -42,24 +37,21 @@ class ServicoLocalizacaoMotorista {
   final ServicoPreferenciasUsuario _servicoPreferencias;
   final RepositorioMotorista _repositorioMotorista;
 
-  Timer? _timerLocalizacao;
+  StreamSubscription<Position>? _assinaturaLocalizacao;
   EstadoLocalizacaoMotorista _estadoAtual = EstadoLocalizacaoMotorista.inativo;
+  DateTime? _ultimoEnvio;
 
-  // Callbacks para notificação de mudanças
   OnEstadoMudou? _onEstadoMudou;
   OnErro? _onErro;
 
-  // ID do motorista e MAC para envio
   int? _idMotorista;
   String? _macDispositivo;
 
-  // Intervalo de coleta (30 segundos)
-  static const Duration intervaloColeta = Duration(seconds: 30);
+  static const Duration intervaloColeta =
+      ServicoLocalizacao.intervaloColetaMotorista;
 
-  /// Estado atual da coleta de localização.
   EstadoLocalizacaoMotorista get estadoAtual => _estadoAtual;
 
-  /// Define callbacks para notificação de mudanças e erros.
   void configurarCallbacks({
     required OnEstadoMudou onEstadoMudou,
     required OnErro onErro,
@@ -68,17 +60,12 @@ class ServicoLocalizacaoMotorista {
     _onErro = onErro;
   }
 
-  /// Inicia a coleta periódica de localização do motorista.
-  ///
-  /// Deve ser chamado quando o motorista muda para status "Em percurso".
-  /// Retorna true se iniciado com sucesso, false caso contrário.
   Future<bool> iniciarColeta({
     required int idMotorista,
   }) async {
     try {
       _idMotorista = idMotorista;
 
-      // Obter MAC do dispositivo
       final preferencias = await _servicoPreferencias.carregar();
       _macDispositivo = preferencias.idDispositivo;
 
@@ -90,8 +77,8 @@ class ServicoLocalizacaoMotorista {
         return false;
       }
 
-      // Verificar permissão de localização reutilizando o serviço existente
-      final temPermissao = await _servicoLocalizacao.verificarPermissao();
+      final temPermissao =
+          await _servicoLocalizacao.garantirPermissaoSegundoPlano();
       if (!temPermissao) {
         _notificarErro('Permissão de localização negada.');
         return false;
@@ -99,15 +86,26 @@ class ServicoLocalizacaoMotorista {
 
       _mudarEstado(EstadoLocalizacaoMotorista.coletando);
 
-      // Fazer envio imediato da primeira localização
-      await _coletarEEnviarLocalizacao();
+      final posicaoInicial = await Geolocator.getCurrentPosition(
+        locationSettings: _servicoLocalizacao.configuracoesColetaMotorista(),
+      ).timeout(const Duration(seconds: 15));
+      await _enviarPosicao(posicaoInicial);
 
-      // Iniciar timer para coleta periódica
-      _timerLocalizacao = Timer.periodic(intervaloColeta, (_) {
-        _coletarEEnviarLocalizacao();
-      });
+      final settings = _servicoLocalizacao.configuracoesColetaMotorista();
+      await _assinaturaLocalizacao?.cancel();
+      _assinaturaLocalizacao = Geolocator.getPositionStream(
+        locationSettings: settings,
+      ).listen(
+        _processarPosicao,
+        onError: (Object erro) {
+          _notificarErro('Erro na coleta de localização: $erro');
+          _mudarEstado(EstadoLocalizacaoMotorista.erro);
+        },
+      );
 
-      debugPrint('[PUNC motorista] Coleta de localização iniciada.');
+      debugPrint(
+        '[PUNC motorista] Coleta de localização iniciada (2º plano).',
+      );
       return true;
     } catch (e) {
       _notificarErro('Erro ao iniciar coleta: $e');
@@ -116,20 +114,27 @@ class ServicoLocalizacaoMotorista {
     }
   }
 
-  /// Para a coleta periódica de localização do motorista.
-  ///
-  /// Deve ser chamado quando o motorista muda para status "Inativo".
   void pararColeta() {
-    _timerLocalizacao?.cancel();
-    _timerLocalizacao = null;
+    _assinaturaLocalizacao?.cancel();
+    _assinaturaLocalizacao = null;
+    _ultimoEnvio = null;
     _idMotorista = null;
     _macDispositivo = null;
     _mudarEstado(EstadoLocalizacaoMotorista.inativo);
     debugPrint('[PUNC motorista] Coleta de localização parada.');
   }
 
-  /// Coleta a localização atual e a envia ao backend.
-  Future<void> _coletarEEnviarLocalizacao() async {
+  Future<void> _processarPosicao(Position posicao) async {
+    final agora = DateTime.now();
+    if (_ultimoEnvio != null &&
+        agora.difference(_ultimoEnvio!) < intervaloColeta) {
+      return;
+    }
+
+    await _enviarPosicao(posicao);
+  }
+
+  Future<void> _enviarPosicao(Position posicao) async {
     if (_idMotorista == null || _macDispositivo == null) {
       return;
     }
@@ -137,22 +142,19 @@ class ServicoLocalizacaoMotorista {
     try {
       _mudarEstado(EstadoLocalizacaoMotorista.enviando);
 
-      // Obter localização atual
-      final localizacao = await _servicoLocalizacao.obterLocalizacaoAtual();
-
-      // Enviar ao backend
       await _repositorioMotorista.enviarLocalizacao(
         idMotorista: _idMotorista!,
         mac: _macDispositivo!,
-        latitude: localizacao.latitude,
-        longitude: localizacao.longitude,
+        latitude: posicao.latitude,
+        longitude: posicao.longitude,
       );
 
+      _ultimoEnvio = DateTime.now();
       _mudarEstado(EstadoLocalizacaoMotorista.coletando);
 
       debugPrint(
         '[PUNC motorista] Localização enviada: '
-        'lat=${localizacao.latitude}, lon=${localizacao.longitude}',
+        'lat=${posicao.latitude}, lon=${posicao.longitude}',
       );
     } catch (e) {
       _notificarErro('Erro ao enviar localização: $e');
@@ -160,7 +162,6 @@ class ServicoLocalizacaoMotorista {
     }
   }
 
-  /// Notifica uma mudança de estado através do callback.
   void _mudarEstado(EstadoLocalizacaoMotorista novoEstado) {
     if (_estadoAtual != novoEstado) {
       _estadoAtual = novoEstado;
@@ -168,13 +169,11 @@ class ServicoLocalizacaoMotorista {
     }
   }
 
-  /// Notifica um erro através do callback.
   void _notificarErro(String mensagem) {
     debugPrint('[PUNC motorista] Erro: $mensagem');
     _onErro?.call(mensagem);
   }
 
-  /// Limpa recursos do serviço.
   void dispose() {
     pararColeta();
     _onEstadoMudou = null;

@@ -42,12 +42,23 @@ class _CronogramaPageState extends State<CronogramaPage> {
 
     if (cepSalvo.isNotEmpty) {
       _cepController.text = cepSalvo;
-      final resultado = await _viewModel.carregarSomenteCache(cep: cepSalvo);
+
+      final cache = await _viewModel.carregarSomenteCache(cep: cepSalvo);
+      if (!mounted) return;
+      setState(() {
+        _horarios = cache.horarios;
+        _cepAtual = cache.cep;
+        _carregandoInicial = false;
+        _buscando = true;
+      });
+
+      final resultado = await _viewModel.buscarNaRede(cep: cepSalvo);
       if (!mounted) return;
       setState(() {
         _horarios = resultado.horarios;
         _cepAtual = resultado.cep;
-        _carregandoInicial = false;
+        _mensagemErro = resultado.mensagemErro;
+        _buscando = false;
       });
       return;
     }
@@ -262,10 +273,6 @@ class _CronogramaConteudo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: buscando ? null : onBuscarOutroCep,
-            child: const Text('Buscar outro CEP'),
-          ),
           const SizedBox(height: 12),
           ...horarios.map(
             (horario) => CardCrono(

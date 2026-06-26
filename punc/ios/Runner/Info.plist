@@ -73,6 +73,10 @@
     <string>Este aplicativo precisa de acesso à sua localização para fornecer serviços de coleta urbana.</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>Este aplicativo precisa de acesso à sua localização para fornecer serviços de coleta urbana.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>location</string>
+    </array>
     <!-- Permissões de Notificação (Firebase Messaging) -->
     <key>FirebaseMessagingAutoInitEnabled</key>
     <true/>

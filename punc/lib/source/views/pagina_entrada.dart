@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/servicos/servico_identificacao_motorista.dart';
 import '../data/servicos/servico_notificacoes.dart';
 import '../data/servicos/servico_preferencias_usuario.dart';
+import '../viewmodels/cronograma_view_model.dart';
 import '../viewmodels/motorista_view_model.dart';
 import '../widgets/estado_pagina.dart';
 import 'localizacao_atual_page.dart';
@@ -32,6 +33,7 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
   Future<void> _decidirRota() async {
     final identificacao = await _identificacaoMotorista.verificar();
     final preferencias = await _preferencias.carregar();
+    _sincronizarCronogramaEmBackground(preferencias.cep);
 
     if (!mounted) {
       return;
@@ -50,6 +52,8 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
         macDispositivo: identificacao.macDispositivo,
         nomeDispositivo: motorista.nomeDispositivo,
         statusRemoto: motorista.status,
+        tipoLixo: motorista.tipoLixo,
+        identificacaoCaminhao: motorista.identificacaoCaminhao,
       );
       await motoristaVm.sincronizarEstadoInicial();
 
@@ -97,6 +101,15 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
         // Notificacoes sao opcionais para abrir o app offline.
       }
     }());
+  }
+
+  void _sincronizarCronogramaEmBackground(String? cep) {
+    final cepSalvo = cep?.trim() ?? '';
+    if (cepSalvo.isEmpty) return;
+
+    unawaited(
+      CronogramaViewModel().buscarNaRede(cep: cepSalvo),
+    );
   }
 
   @override

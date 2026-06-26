@@ -47,12 +47,16 @@ class RepositorioMotorista {
     required int idMotorista,
     required String mac,
     required String status,
+    String? tipoLixo,
+    String? identificacaoCaminhao,
   }) async {
     final resposta = await _client.patch(
       '/api/motorista/$idMotorista/percurso',
       corpo: {
         'mac': mac,
         'status': status,
+        'tipo_lixo': ?tipoLixo,
+        'identificacao_caminhao': ?identificacaoCaminhao,
       },
     );
 
