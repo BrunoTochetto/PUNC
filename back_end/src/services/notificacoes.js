@@ -270,9 +270,10 @@ class Notificacoes {
 		const intervaloMin = respeitarIntervalo ? this._intervaloNotificacaoMin() : 0;
 		if (intervaloMin > 0) {
 			parametros.push(intervaloMin);
-			filtros.push(
-				`c.ultima_atualizacao <= NOW() - ($${parametros.length} * INTERVAL '1 minute')`
-			);
+			filtros.push(`
+						(c.ultima_atualizacao IS NULL
+							OR c.ultima_atualizacao <= NOW() - ($${parametros.length} * INTERVAL '1 hour'))
+						`);
 		}
 
 		const whereClause = filtros.length > 0 ? `WHERE ${filtros.join(' AND ')}` : '';
