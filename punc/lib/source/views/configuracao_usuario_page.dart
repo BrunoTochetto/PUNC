@@ -101,42 +101,10 @@ class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
       preferencias.configurado && (preferencias.topicoFcm?.isNotEmpty ?? false);
 
   Future<void> _mudarCep() async {
-    final controller = TextEditingController(text: preferencias.cep ?? '');
     final novoCep = await showDialog<String>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Mudar CEP'),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            maxLength: 9,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Digite seu CEP',
-              prefixIcon: Icon(Icons.local_post_office_outlined),
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final cep = controller.text.trim();
-                if (cep.isEmpty) return;
-                Navigator.pop(context, cep);
-              },
-              child: const Text('Salvar'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => _DialogMudarCep(cepInicial: preferencias.cep ?? ''),
     );
-
-    controller.dispose();
 
     if (novoCep == null || !mounted) return;
 
@@ -291,45 +259,45 @@ class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
 
           const SizedBox(height: 22),
 
-          _buildContainer(
-            context,
-            child: Column(
-              children: [
-                SectionHeader(
-                  icon: Icons.notifications_none,
-                  title: 'Notificações',
-                ),
-                SettingSwitch(
-                  title: 'Receber notificações.',
-                  value: true,
-                  onChanged: (value) {},
-                ),
-                SettingSwitch(
-                  title: 'Notificações das rotas.',
-                  value: true,
-                  onChanged: (value) {},
-                ),
-                SettingSwitch(
-                  title: 'Notificações de atualizações de status.',
-                  value: true,
-                  onChanged: (value) {},
-                ),
-                const SizedBox(height: 12),
-                if (kDebugMode)
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.pushNamed(
-                        context,
-                        '/debug-notificacoes',
-                      ),
-                      icon: const Icon(Icons.bug_report_outlined),
-                      label: const Text('Abrir depuração de notificações'),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          // _buildContainer(
+          //   context,
+          //   child: Column(
+          //     children: [
+          //       SectionHeader(
+          //         icon: Icons.notifications_none,
+          //         title: 'Notificações',
+          //       ),
+          //       SettingSwitch(
+          //         title: 'Receber notificações.',
+          //         value: true,
+          //         onChanged: (value) {},
+          //       ),
+          //       SettingSwitch(
+          //         title: 'Notificações das rotas.',
+          //         value: true,
+          //         onChanged: (value) {},
+          //       ),
+          //       SettingSwitch(
+          //         title: 'Notificações de atualizações de status.',
+          //         value: true,
+          //         onChanged: (value) {},
+          //       ),
+          //       const SizedBox(height: 12),
+          //       if (kDebugMode)
+          //         SizedBox(
+          //           width: double.infinity,
+          //           child: OutlinedButton.icon(
+          //             onPressed: () => Navigator.pushNamed(
+          //               context,
+          //               '/debug-notificacoes',
+          //             ),
+          //             icon: const Icon(Icons.bug_report_outlined),
+          //             label: const Text('Abrir depuração de notificações'),
+          //           ),
+          //         ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );
@@ -393,6 +361,65 @@ class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+class _DialogMudarCep extends StatefulWidget {
+  const _DialogMudarCep({required this.cepInicial});
+
+  final String cepInicial;
+
+  @override
+  State<_DialogMudarCep> createState() => _DialogMudarCepState();
+}
+
+class _DialogMudarCepState extends State<_DialogMudarCep> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.cepInicial);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _salvar() {
+    final cep = _controller.text.trim();
+    if (cep.isEmpty) return;
+    Navigator.pop(context, cep);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Mudar CEP'),
+      content: TextField(
+        controller: _controller,
+        keyboardType: TextInputType.number,
+        maxLength: 9,
+        autofocus: true,
+        decoration: const InputDecoration(
+          hintText: 'Digite seu CEP',
+          prefixIcon: Icon(Icons.local_post_office_outlined),
+          border: OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _salvar,
+          child: const Text('Salvar'),
+        ),
+      ],
     );
   }
 }

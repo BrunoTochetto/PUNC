@@ -20,6 +20,9 @@ Para um melhor gerenciamento de erros e depurração, foi adicionado um sistema 
 
 Os logs são gerados pela biblioteca winston. É criado um log diário com todos os logs (info, aviso e erros) e um só para erros. A pasta logs fica no diretório principal e foi colocada no .gitignore
 
+### Criação de um aplicativo separado para o gerenciamento
+
+Isso não estava constado no pré-projeto, mas é bom mencionar. O projeto foi dividido entre aplicativo padrão e aplicativo de gerenciamento, especialmente para ajudar no desenvolvimento.
 
 ### Mudanças menores
 

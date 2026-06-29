@@ -1,5 +1,5 @@
-import '../../../data/modelos/horario_coleta.dart';
-import '../../../data/repositorios/repositorio_horario_coleta.dart';
+import '../../data/modelos/horario_coleta.dart';
+import '../../data/repositorios/repositorio_horario_coleta.dart';
 
 /// Lista todos os horários do gerente, incluindo os desativados.
 class ListarHorariosPorGerente {

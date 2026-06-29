@@ -66,8 +66,8 @@ async function listar(req, res) {
     });
 
   } catch (e) {
-    res.status(500);
     logErro("Listar horarios por CEP", e);
+    res.status(500).json({ erro: 'Erro ao listar horários por CEP.' });
   }
 };
 
@@ -141,7 +141,7 @@ async function editar(req, res){
       return res.status(400).json({ erro: 'ID do horário inválido.' });
     }
 
-    if (!horario_estimado && !dia_semana && !tipo_lixo && !comentarios && !id_area_atuacao && !ativo) {
+    if (!horario_estimado && !dia_semana && !tipo_lixo && comentarios === undefined && id_area_atuacao === undefined && ativo === undefined) {
       return res.status(400).json({ erro: 'Ao menos um campo deve ser informado para atualização.' });
     }
 
@@ -220,7 +220,7 @@ async function editar(req, res){
 // ! Não testado
 async function listarPorGerente(req, res) {
   try {
-    const { id_gerente } = req.body;
+    const id_gerente = req.query.id_gerente ?? req.body?.id_gerente;
 
     if (!id_gerente || Number.isNaN(id_gerente)) {
       await logAviso('Listar horários por gerente: ID do gerente inválido', null);
@@ -252,9 +252,42 @@ async function listarPorGerente(req, res) {
     });
 
   } catch (e) {
-    res.status(500);
     logErro("Listar horarios por gerente", e);
+    res.status(500).json({ erro: 'Erro ao listar horários do gerente.' });
   }
 };
 
-export {listar, criar, editar, listarPorGerente}
+/*
+* [Recebe]: id_gerente, id_horario
+* [Retorna]: Mensagem de confirmação de exclusão.
+*/
+async function deletar(req, res) {
+  try {
+    const { id_gerente, id_horario } = req.body;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+    if (!id_horario || Number.isNaN(Number(id_horario))) {
+      return res.status(400).json({ erro: 'ID do horário inválido.' });
+    }
+
+    const resultado = await querry(
+      `DELETE FROM horarios_coleta
+       WHERE id = $1 AND id_gerente = $2
+       RETURNING id`,
+      [Number(id_horario), Number(id_gerente)],
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ erro: 'Horário não encontrado ou não autorizado.' });
+    }
+
+    res.status(200).json({ mensagem: 'Horário excluído com sucesso.' });
+  } catch (erro) {
+    logErro('Excluir horario de coleta', erro);
+    res.status(500).json({ erro: 'Erro ao excluir horário de coleta.' });
+  }
+}
+
+export {listar, criar, editar, listarPorGerente, deletar}

@@ -1,4 +1,4 @@
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// RF12 — Caso de uso "Remover caminhão/motorista".
 class RemoverMotorista {

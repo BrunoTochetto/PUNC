@@ -17,7 +17,7 @@ CREATE TABLE celulas (
     cell_x BIGINT NOT NULL,
     cell_y BIGINT NOT NULL,
     id_regiao BIGINT, 
-    ultima_atualizacao TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ultima_atualizacao TIMESTAMPTZ,
 
     CONSTRAINT fk_regiao
     FOREIGN KEY (id_regiao) 

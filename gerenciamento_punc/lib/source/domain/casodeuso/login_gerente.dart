@@ -1,5 +1,5 @@
-import '../../../data/modelos/gerente.dart';
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/modelos/gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// RF07 — Caso de uso de autenticação do gerente.
 class LoginGerente {

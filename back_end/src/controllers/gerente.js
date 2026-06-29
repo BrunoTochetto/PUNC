@@ -59,9 +59,15 @@ async function login(req, res){
 };
 
 // Função utilizada apenas para os devs devs
-async function registrarGerente(nome, senha, email) {
+async function registrarGerente(req, res) {
+  const { senha_super_secreta, nome, senha, email } = req.body;
   try {
     await logInfo(`Registrando novo gerente: ${nome}`);
+
+    if (senha_super_secreta != process.env.SENHA_SECRETA) {
+      await logInfo(`Senha super secreta inválida`);
+      return;
+    }
 
     const senhaCriptografada = await bcrypt.hash(senha, 10);
     const resultado = await querry(
@@ -72,7 +78,7 @@ async function registrarGerente(nome, senha, email) {
     const gerente = resultado.rows[0];
     await logInfo(`Gerente registrado com sucesso - ID: ${gerente.id}, Nome: ${gerente.nome_usuario}`);
 
-    return { sucesso: true, gerente };
+    return res.json({ sucesso: true, gerente });
   } catch (erro) {
     await logErro(`Erro ao registrar gerente ${nome}`, erro);
   }
@@ -87,7 +93,7 @@ async function registrarGerente(nome, senha, email) {
 */
 async function listarMotoristas(req, res){
   try {
-    const { id_gerente } = req.body;
+    const id_gerente = req.query.id_gerente ?? req.body?.id_gerente;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -96,6 +102,7 @@ async function listarMotoristas(req, res){
     const pegarMotoristas = `
       SELECT * FROM vw_motoristas_de_gerentes
       WHERE id_gerente = $1
+      AND id_motorista IS NOT NULL
       ORDER BY id_motorista
     `;
 
@@ -211,7 +218,8 @@ async function deletarMotorista(req, res){
 async function listarAreasAtuacao(req, res){
   try {
 
-    const {id_gerente, cep} = req.body;
+    const id_gerente = req.query.id_gerente ?? req.body?.id_gerente;
+    const cep = req.query.cep ?? req.body?.cep;
 
     if (!id_gerente || Number.isNaN(Number(id_gerente))) {
       return res.status(400).json({ erro: 'ID do gerente inválido.' });
@@ -267,7 +275,7 @@ async function criarAreaAtuacao(req, res){
       AND cep = $2
     `;
 
-    const duplicata = await querry(verificarDuplicata, [Number(id_gerente), validCep.value()]);
+    const duplicata = await querry(verificarDuplicata, [Number(id_gerente), validCep.value]);
     if (duplicata.rows.length > 0) {
       return res.status(409).json({ mensagem: 'CEP já existe.' });
     }
@@ -278,7 +286,7 @@ async function criarAreaAtuacao(req, res){
       RETURNING id, id_gerente, cep
     `;
 
-    const resultado = await querry(criacao, [Number(id_gerente), validCep.value()]);
+    const resultado = await querry(criacao, [Number(id_gerente), validCep.value]);
     res.status(201).json({ mensagem: 'Área de atuação criada com sucesso.', area: resultado.rows[0] });
   } catch (e) {
     logErro('Erro ao criar área de atuação', e);
@@ -322,4 +330,110 @@ async function deletarAreaAtuacao(req, res){
   }
 };
 
-export { deletarMotorista, criarMotorista, listarMotoristas, login, listarAreasAtuacao, criarAreaAtuacao, deletarAreaAtuacao }
+/*
+* [Recebe]: id_gerente
+* [Retorna]: trajetórias finalizadas dos motoristas do gerente
+*/
+async function listarTrajetorias(req, res) {
+  try {
+    const id_gerente = req.query.id_gerente ?? req.body?.id_gerente;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+
+    const query = `
+      SELECT
+        t.id AS id_trajetoria,
+        t.id_motorista,
+        m.nome_dispositivo AS nome_motorista,
+        m.mac,
+        m.identificacao_caminhao,
+        t.tipo_lixo,
+        t.tempo_comeco,
+        t.tempo_fim,
+        COUNT(lt.id) AS quantidade_localizacoes
+      FROM trajetorias t
+      JOIN motoristas m ON m.id = t.id_motorista
+      LEFT JOIN localizacao_trajetorias lt ON lt.id_trajetoria = t.id
+      WHERE m.id_gerente = $1
+      GROUP BY
+        t.id, t.id_motorista, m.nome_dispositivo, m.mac,
+        m.identificacao_caminhao, t.tipo_lixo, t.tempo_comeco, t.tempo_fim
+      ORDER BY t.tempo_comeco DESC
+    `;
+
+    const resultado = await querry(query, [Number(id_gerente)]);
+    res.status(200).json({ trajetorias: resultado.rows });
+  } catch (e) {
+    logErro('Erro ao listar trajetórias do gerente', e);
+    res.status(500).json({ erro: 'Erro ao listar trajetórias.' });
+  }
+}
+
+/*
+* [Recebe]: id_gerente, id_trajetoria
+* [Retorna]: localizações da trajetória
+*/
+async function listarLocalizacoesTrajetoria(req, res) {
+  try {
+    const id_gerente = req.query.id_gerente ?? req.body?.id_gerente;
+    const id_trajetoria = req.params.id ?? req.query.id_trajetoria ?? req.body?.id_trajetoria;
+
+    if (!id_gerente || Number.isNaN(Number(id_gerente))) {
+      return res.status(400).json({ erro: 'ID do gerente inválido.' });
+    }
+    if (!id_trajetoria || Number.isNaN(Number(id_trajetoria))) {
+      return res.status(400).json({ erro: 'ID da trajetória inválido.' });
+    }
+
+    const query = `
+      SELECT
+        lt.id AS id_localizacao,
+        lt.id_trajetoria,
+        lt.data_criacao,
+        ST_X(ST_Transform(lt.geom_3857, 4326)) AS longitude,
+        ST_Y(ST_Transform(lt.geom_3857, 4326)) AS latitude
+      FROM localizacao_trajetorias lt
+      JOIN trajetorias t ON t.id = lt.id_trajetoria
+      JOIN motoristas m ON m.id = t.id_motorista
+      WHERE lt.id_trajetoria = $1
+        AND m.id_gerente = $2
+      ORDER BY lt.data_criacao, lt.id
+    `;
+
+    const resultado = await querry(query, [Number(id_trajetoria), Number(id_gerente)]);
+
+    if (resultado.rows.length === 0) {
+      const pertence = await querry(
+        `SELECT t.id
+         FROM trajetorias t
+         JOIN motoristas m ON m.id = t.id_motorista
+         WHERE t.id = $1 AND m.id_gerente = $2`,
+        [Number(id_trajetoria), Number(id_gerente)],
+      );
+
+      if (pertence.rows.length === 0) {
+        return res.status(404).json({ erro: 'Trajetória não encontrada ou não autorizada.' });
+      }
+    }
+
+    res.status(200).json({ localizacoes: resultado.rows });
+  } catch (e) {
+    logErro('Erro ao listar localizações da trajetória', e);
+    res.status(500).json({ erro: 'Erro ao listar localizações da trajetória.' });
+  }
+}
+
+export {
+  deletarMotorista,
+  criarMotorista,
+  listarMotoristas,
+  login,
+  listarAreasAtuacao,
+  criarAreaAtuacao,
+  deletarAreaAtuacao,
+  listarTrajetorias,
+  listarLocalizacoesTrajetoria,
+  registrarGerente
+}

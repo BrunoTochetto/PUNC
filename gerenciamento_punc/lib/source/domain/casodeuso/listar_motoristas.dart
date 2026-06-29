@@ -1,5 +1,5 @@
-import '../../../data/modelos/gerente.dart';
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/modelos/gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// Caso de uso "Consultar/listar caminhões" (gerente).
 class ListarMotoristasGerente {

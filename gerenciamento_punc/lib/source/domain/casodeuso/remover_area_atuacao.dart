@@ -1,4 +1,4 @@
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// Remove uma área de atuação do gerente.
 class RemoverAreaAtuacao {

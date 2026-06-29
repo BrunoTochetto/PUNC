@@ -1,5 +1,5 @@
-import '../../../data/modelos/gerente.dart';
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/modelos/gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// Lista as áreas de atuação (grupos por CEP) do gerente.
 class ListarAreasAtuacao {

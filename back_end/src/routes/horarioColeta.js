@@ -4,10 +4,11 @@ import { autenticacaoNecessaria } from '../middlewares/autenticacao.js';
 
 const router = express.Router();
 
-router.get('/:cep', controller.listar);
+router.get('/gerente/', autenticacaoNecessaria, controller.listarPorGerente);
 router.get('/', controller.listar);
 router.post('/', autenticacaoNecessaria, controller.criar);
 router.put('/', autenticacaoNecessaria, controller.editar);
-router.get('/gerente/', autenticacaoNecessaria, controller.listarPorGerente);
+router.delete('/', autenticacaoNecessaria, controller.deletar);
+router.get('/:cep', controller.listar);
 
 export default router;

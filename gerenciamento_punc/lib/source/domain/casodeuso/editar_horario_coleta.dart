@@ -1,5 +1,5 @@
-import '../../../data/modelos/horario_coleta.dart';
-import '../../../data/repositorios/repositorio_horario_coleta.dart';
+import '../../data/modelos/horario_coleta.dart';
+import '../../data/repositorios/repositorio_horario_coleta.dart';
 
 /// Caso de uso "Editar horários de coleta" e "Remover horários de coleta"
 /// (desativação via campo [ativo] = false).

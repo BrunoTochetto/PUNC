@@ -1,5 +1,5 @@
-import '../../../data/modelos/gerente.dart';
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/modelos/gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// Cadastra uma nova área de atuação (grupo/região por CEP).
 class CadastrarAreaAtuacao {
@@ -13,8 +13,8 @@ class CadastrarAreaAtuacao {
     required String cep,
   }) {
     final cepLimpo = cep.replaceAll(RegExp(r'[^0-9]'), '');
-    if (cepLimpo.length != 8) {
-      throw ArgumentError('CEP deve conter 8 dígitos.');
+    if (cepLimpo.isEmpty || cepLimpo.length > 9) {
+      throw ArgumentError('CEP deve conter entre 1 e 9 dígitos.');
     }
 
     return _repositorio.cadastrarAreaAtuacao(

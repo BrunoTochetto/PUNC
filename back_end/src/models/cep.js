@@ -23,9 +23,9 @@ class CEP {
 		}
 		const cepFormatado = cepSeparado[0];
 
-		if (cepFormatado.length > 8) {
+		if (cepFormatado.length > 9) {
 			const erro = new Error(
-				`Formato de CEP inválido: ${cep} - ${cepFormatado}. Use o formato 12345-123 ou menos, para menos precisão.`
+				`Formato de CEP inválido: ${cep} - ${cepFormatado}. Use até 9 dígitos numéricos.`
 			);
 			logAviso(`CEP: ${erro.message}`, erro);
 			return false

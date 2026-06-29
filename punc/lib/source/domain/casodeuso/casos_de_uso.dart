@@ -8,4 +8,3 @@ library;
 
 export 'casos_de_uso_usuario.dart';
 export 'casos_de_uso_motorista.dart';
-export 'casos_de_uso_gerente.dart';

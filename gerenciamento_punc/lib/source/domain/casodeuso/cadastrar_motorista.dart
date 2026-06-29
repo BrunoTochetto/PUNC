@@ -1,5 +1,5 @@
-import '../../../data/modelos/gerente.dart';
-import '../../../data/repositorios/repositorio_gerente.dart';
+import '../../data/modelos/gerente.dart';
+import '../../data/repositorios/repositorio_gerente.dart';
 
 /// RF12 — Caso de uso "Cadastrar caminhão/motorista".
 class CadastrarMotorista {

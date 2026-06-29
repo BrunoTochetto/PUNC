@@ -1,5 +1,5 @@
-import '../../../data/modelos/horario_coleta.dart';
-import '../../../data/repositorios/repositorio_horario_coleta.dart';
+import '../../data/modelos/horario_coleta.dart';
+import '../../data/repositorios/repositorio_horario_coleta.dart';
 
 /// RF09 — Caso de uso "Cadastrar horários de coleta".
 class CadastrarHorarioColeta {
