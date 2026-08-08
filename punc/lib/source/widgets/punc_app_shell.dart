@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../nucleo/temas/appCores.dart';
+import 'package:provider/provider.dart';
+
+import '../viewmodels/motorista_view_model.dart';
 
 class PuncAppShell extends StatelessWidget {
   const PuncAppShell({
@@ -18,6 +20,7 @@ class PuncAppShell extends StatelessWidget {
     // Cores do tema da aplicação
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final ehMotorista = context.watch<MotoristaViewModel>().ehMotorista;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -49,20 +52,25 @@ class PuncAppShell extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.primary,
               boxShadow: [
-                BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -2))
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
               ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildBottomNavItem(
-                  context,
-                  Icons.map_outlined,
-                  'Mapa',
-                  selectedRoute == '/mapa',
-                  '/mapa',
-                  colorScheme.onPrimary,
-                ),
+                if (ehMotorista)
+                  _buildBottomNavItem(
+                    context,
+                    Icons.local_shipping_outlined,
+                    'Rota',
+                    selectedRoute == '/mapa',
+                    '/mapa',
+                    colorScheme.onPrimary,
+                  ),
                 _buildBottomNavItem(
                   context,
                   Icons.calendar_today,
@@ -112,7 +120,11 @@ class PuncAppShell extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: isSelected ? baseColor : baseColor.withValues(alpha: 0.6), size: 24),
+          Icon(
+            icon,
+            color: isSelected ? baseColor : baseColor.withValues(alpha: 0.6),
+            size: 24,
+          ),
           const SizedBox(height: 4),
           Text(
             label,

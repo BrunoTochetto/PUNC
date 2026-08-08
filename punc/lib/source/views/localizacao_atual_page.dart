@@ -47,10 +47,8 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
           content: const Text('Não foi possível configurar as notificações.'),
           action: SnackBarAction(
             label: 'Debug',
-            onPressed: () => Navigator.pushNamed(
-              context,
-              '/debug-notificacoes',
-            ),
+            onPressed: () =>
+                Navigator.pushNamed(context, '/debug-notificacoes'),
           ),
         ),
       );
@@ -99,8 +97,8 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                   'Primeiro acesso',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -108,10 +106,7 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  localizacao.descricao,
-                  textAlign: TextAlign.center,
-                ),
+                Text(localizacao.descricao, textAlign: TextAlign.center),
                 const SizedBox(height: 6),
                 Text(
                   '${localizacao.latitude}, ${localizacao.longitude}',
@@ -132,16 +127,17 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                 TextButton(
                   onPressed: _salvando
                       ? null
-                      : () => Navigator.pushReplacementNamed(context, '/mapa'),
+                      : () => Navigator.pushReplacementNamed(
+                          context,
+                          '/cronograma',
+                        ),
                   child: const Text('Configurar depois'),
                 ),
                 TextButton.icon(
                   onPressed: _salvando
                       ? null
-                      : () => Navigator.pushNamed(
-                            context,
-                            '/debug-notificacoes',
-                          ),
+                      : () =>
+                            Navigator.pushNamed(context, '/debug-notificacoes'),
                   icon: const Icon(Icons.bug_report_outlined),
                   label: const Text('Abrir depuração de notificações'),
                 ),

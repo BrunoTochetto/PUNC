@@ -76,24 +76,22 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
         return;
       }
 
-      Navigator.pushReplacementNamed(context, '/mapa');
+      Navigator.pushReplacementNamed(context, '/cronograma');
       return;
     }
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute<void>(
-        builder: (_) => const LocalizacaoAtualPage(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const LocalizacaoAtualPage()),
     );
   }
 
   void _inicializarNotificacoesEmBackground(String topico) {
     unawaited(() async {
       try {
-        await _servicoNotificacoes
-            .inicializar()
-            .timeout(const Duration(seconds: 8));
+        await _servicoNotificacoes.inicializar().timeout(
+          const Duration(seconds: 8),
+        );
         await _servicoNotificacoes
             .inscreverNoTopico(topico)
             .timeout(const Duration(seconds: 8));
@@ -107,15 +105,11 @@ class _PaginaEntradaState extends State<PaginaEntrada> {
     final cepSalvo = cep?.trim() ?? '';
     if (cepSalvo.isEmpty) return;
 
-    unawaited(
-      CronogramaViewModel().buscarNaRede(cep: cepSalvo),
-    );
+    unawaited(CronogramaViewModel().buscarNaRede(cep: cepSalvo));
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: EstadoCarregando(),
-    );
+    return const Scaffold(body: EstadoCarregando());
   }
 }

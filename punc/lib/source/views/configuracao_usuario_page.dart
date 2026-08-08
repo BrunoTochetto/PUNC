@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../data/servicos/servico_preferencias_usuario.dart';
 import '../viewmodels/configuracao_view_model.dart';
 import '../widgets/estado_pagina.dart';
 import '../widgets/punc_app_shell.dart';
 import '../widgets/section_header.dart';
-import '../widgets/setting_switch.dart';
 
 class ConfiguracaoUsuarioPage extends StatefulWidget {
   const ConfiguracaoUsuarioPage({super.key});

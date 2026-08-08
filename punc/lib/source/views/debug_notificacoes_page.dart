@@ -4,10 +4,7 @@ import '../data/servicos/servico_preferencias_usuario.dart';
 import '../viewmodels/localizacao_view_model.dart';
 
 class DebugNotificacoesPage extends StatelessWidget {
-  const DebugNotificacoesPage({
-    super.key,
-    this.resultado,
-  });
+  const DebugNotificacoesPage({super.key, this.resultado});
 
   final ResultadoConfiguracaoLocalizacao? resultado;
 
@@ -23,9 +20,7 @@ class DebugNotificacoesPage extends StatelessWidget {
     final inscricaoBackend = usuario.inscricaoFcm;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Depuração de notificações'),
-      ),
+      appBar: AppBar(title: const Text('Depuração de notificações')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -39,8 +34,9 @@ class DebugNotificacoesPage extends StatelessWidget {
                   : 'Não inscrita',
               'Erro inscricao Firebase':
                   resultadoAtual.erroInscricao ?? 'Nenhum erro capturado',
-              'Inscricao backend':
-                  inscricaoBackend?.inscrito == true ? 'Sim' : 'Não',
+              'Inscricao backend': inscricaoBackend?.inscrito == true
+                  ? 'Sim'
+                  : 'Não',
               'Motivo backend':
                   inscricaoBackend?.motivo ?? 'Nenhum motivo informado',
               'Erro backend': inscricaoBackend?.erro ?? 'Nenhum erro capturado',
@@ -78,8 +74,9 @@ class DebugNotificacoesPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/mapa'),
-            child: const Text('Ir para o mapa'),
+            onPressed: () =>
+                Navigator.pushReplacementNamed(context, '/cronograma'),
+            child: const Text('Ir para o cronograma'),
           ),
         ],
       ),
@@ -111,9 +108,7 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Depuração de notificações'),
-      ),
+      appBar: AppBar(title: const Text('Depuração de notificações')),
       body: FutureBuilder<PreferenciasUsuario>(
         future: _preferenciasFuture,
         builder: (context, snapshot) {
@@ -130,7 +125,8 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
                   _SecaoDebug(
                     titulo: 'Erro',
                     itens: {
-                      'Falha ao carregar preferencias': snapshot.error.toString(),
+                      'Falha ao carregar preferencias': snapshot.error
+                          .toString(),
                     },
                   ),
                   const SizedBox(height: 16),
@@ -150,8 +146,9 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
               _SecaoDebug(
                 titulo: 'Preferencias locais',
                 itens: {
-                  'Usuario configurado':
-                      preferencias?.configurado == true ? 'Sim' : 'Não',
+                  'Usuario configurado': preferencias?.configurado == true
+                      ? 'Sim'
+                      : 'Não',
                   'Topico salvo':
                       preferencias?.topicoFcm ?? 'Nenhum tópico salvo',
                   'ID/MAC salvo':
@@ -162,27 +159,22 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
               _SecaoDebug(
                 titulo: 'Como usar',
                 itens: {
-                  'Modo atual':
-                      'Então mostra dados salvos no aparelho.',
+                  'Modo atual': 'Então mostra dados salvos no aparelho.',
                   'Cadastro completo':
                       'Para ver ID do usuário, célula X/Y e tópico do backend, refaça o primeiro cadastro pelo botão de localização.',
                 },
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(
-                  context,
-                  '/localizacao',
-                ),
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/localizacao'),
                 child: const Text('Refazer cadastro de localização'),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () => Navigator.pushReplacementNamed(
-                  context,
-                  '/mapa',
-                ),
-                child: const Text('Ir para o mapa'),
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/cronograma'),
+                child: const Text('Ir para o cronograma'),
               ),
             ],
           );
@@ -193,10 +185,7 @@ class _DebugPreferenciasPageState extends State<_DebugPreferenciasPage> {
 }
 
 class _SecaoDebug extends StatelessWidget {
-  const _SecaoDebug({
-    required this.titulo,
-    required this.itens,
-  });
+  const _SecaoDebug({required this.titulo, required this.itens});
 
   final String titulo;
   final Map<String, String> itens;
@@ -211,16 +200,13 @@ class _SecaoDebug extends StatelessWidget {
           children: [
             Text(
               titulo,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             for (final item in itens.entries) ...[
-              Text(
-                item.key,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
+              Text(item.key, style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 4),
               SelectableText(
                 item.value,
