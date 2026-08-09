@@ -33,6 +33,18 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "app"
+    productFlavors {
+        create("normal") {
+            dimension = "app"
+            applicationId = "com.example.punc"
+        }
+        create("clone") {
+            dimension = "app"
+            applicationIdSuffix = ".clone"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

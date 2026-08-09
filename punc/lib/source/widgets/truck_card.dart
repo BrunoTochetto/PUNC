@@ -70,7 +70,7 @@ class TruckCard extends StatelessWidget {
                 _buildInfoRow('Número do caminhão:', truckNumber),
                 _buildInfoRow('Placa:', plate),
                 _buildInfoRow('Modelo:', model),
-                _buildInfoRow('Rota atual:', route),
+                _buildInfoRow('Percurso atual:', route),
                 _buildInfoRow('Status:', status),
                 const SizedBox(height: 8),
                 Align(

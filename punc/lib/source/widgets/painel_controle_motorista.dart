@@ -144,24 +144,56 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
                   ],
                 ],
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        emPercurso
-                            ? 'Rota ativa — enviando localização'
-                            : 'Rota desligada',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ),
-                    Switch.adaptive(
-                      value: emPercurso,
-                      onChanged: motorista.estaSincronizando
+                if (emPercurso) ...[
+                  Text(
+                    'Percurso ativo — enviando localização',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: motorista.estaSincronizando
                           ? null
-                          : (ativo) => _alternarRota(context, motorista, ativo),
+                          : () => _alternarRota(context, motorista, false),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.error,
+                        foregroundColor: colorScheme.onError,
+                        textStyle: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      child: motorista.estaSincronizando
+                          ? SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: colorScheme.onError,
+                              ),
+                            )
+                          : const Text('Terminar percurso'),
                     ),
-                  ],
-                ),
+                  ),
+                ] else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Percurso desligado',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: false,
+                        onChanged: motorista.estaSincronizando
+                            ? null
+                            : (ativo) =>
+                                _alternarRota(context, motorista, ativo),
+                      ),
+                    ],
+                  ),
                 if (motorista.mensagemErro != null) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -194,7 +226,7 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Informe a identificação do caminhão antes de iniciar a rota.',
+              'Informe a identificação do caminhão antes de iniciar o percurso.',
             ),
           ),
         );
@@ -204,7 +236,7 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
       if (motorista.tipoLixoSelecionado == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Selecione o tipo de lixo antes de iniciar a rota.'),
+            content: Text('Selecione o tipo de lixo antes de iniciar o percurso.'),
           ),
         );
         return;
@@ -229,8 +261,8 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
         content: Text(
           motorista.mensagemErro ??
               (ativar
-                  ? 'Não foi possível iniciar a rota.'
-                  : 'Não foi possível desligar a rota.'),
+                  ? 'Não foi possível iniciar o percurso.'
+                  : 'Não foi possível desligar o percurso.'),
         ),
       ),
     );
@@ -247,12 +279,12 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Iniciar rota?'),
+          title: const Text('Iniciar percurso?'),
           content: Text(
-            'Confirma o início da rota do caminhão "$identificacao" '
+            'Confirma o início do percurso do caminhão "$identificacao" '
             'para coleta de lixo $rotulo?\n\n'
-            'Sua localização será enviada em segundo plano enquanto a rota '
-            'estiver ativa, com a notificação "Percurso ativo".',
+            'Sua localização será enviada em segundo plano enquanto o percurso '
+            'estiver ativo, com a notificação "Percurso ativo".',
           ),
           actions: [
             TextButton(
@@ -261,7 +293,7 @@ class _PainelControleMotoristaState extends State<PainelControleMotorista> {
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Iniciar rota'),
+              child: const Text('Iniciar percurso'),
             ),
           ],
         );

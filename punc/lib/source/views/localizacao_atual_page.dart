@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/modelos/localizacao_usuario.dart';
 import '../viewmodels/localizacao_view_model.dart';
 import '../widgets/estado_pagina.dart';
-import 'debug_notificacoes_page.dart';
 
 class LocalizacaoAtualPage extends StatefulWidget {
   const LocalizacaoAtualPage({super.key});
@@ -30,26 +29,14 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
   Future<void> _confirmar(LocalizacaoUsuario localizacao) async {
     setState(() => _salvando = true);
     try {
-      final resultado = await _viewModel.configurarNotificacoes(
-        localizacao: localizacao,
-      );
+      await _viewModel.configurarNotificacoes(localizacao: localizacao);
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => DebugNotificacoesPage(resultado: resultado),
-        ),
-      );
+      Navigator.pushReplacementNamed(context, '/cronograma');
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Não foi possível configurar as notificações.'),
-          action: SnackBarAction(
-            label: 'Debug',
-            onPressed: () =>
-                Navigator.pushNamed(context, '/debug-notificacoes'),
-          ),
+        const SnackBar(
+          content: Text('Não foi possível configurar as notificações.'),
         ),
       );
     } finally {
@@ -132,14 +119,6 @@ class _LocalizacaoAtualPageState extends State<LocalizacaoAtualPage> {
                           '/cronograma',
                         ),
                   child: const Text('Configurar depois'),
-                ),
-                TextButton.icon(
-                  onPressed: _salvando
-                      ? null
-                      : () =>
-                            Navigator.pushNamed(context, '/debug-notificacoes'),
-                  icon: const Icon(Icons.bug_report_outlined),
-                  label: const Text('Abrir depuração de notificações'),
                 ),
               ],
             ),

@@ -50,7 +50,7 @@ class _AcessoRestritoMapa extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'A tela de rota fica disponivel apenas para dispositivos de motorista.',
+              'A tela de percurso fica disponivel apenas para dispositivos de motorista.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.7),
@@ -193,7 +193,7 @@ class _CartaoStatusMotorista extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  emPercurso ? 'Rota ativa' : 'Rota desligada',
+                  emPercurso ? 'Percurso ativo' : 'Percurso desligado',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: corStatus,
@@ -256,8 +256,8 @@ class _ResumoEnvioLocalizacao extends StatelessWidget {
           Expanded(
             child: Text(
               motorista.estaEmPercurso
-                  ? 'Sua localizacao esta sendo enviada enquanto a rota estiver ativa.'
-                  : 'Preencha os dados do caminhao e ligue a rota para iniciar o envio.',
+                  ? 'Sua localizacao esta sendo enviada enquanto o percurso estiver ativo.'
+                  : 'Preencha os dados do caminhao e ligue o percurso para iniciar o envio.',
               style: theme.textTheme.bodyMedium,
             ),
           ),

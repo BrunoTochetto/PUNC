@@ -33,32 +33,24 @@ class PuncAppShell extends StatelessWidget {
           padding: const EdgeInsets.only(left: 18, top: 8, bottom: 8),
           child: Image.asset('assets/imagens/icones/logo.png'),
         ),
-        // actions: [
-        //   IconButton(
-        //     tooltip: 'Notificações',
-        //     icon: const Icon(Icons.notifications_none),
-        //     onPressed: () => Navigator.pushNamed(context, '/debug-notificacoes'),
-        //   ),
-        //   const SizedBox(width: 8),
-        // ],
       ),
       floatingActionButton: floatingActionButton,
-      body: Column(
-        children: [
-          Expanded(child: body),
-          // Barra Inferior com Navegação Funcional
-          Container(
-            height: 72,
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+      body: body,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 72,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -66,7 +58,7 @@ class PuncAppShell extends StatelessWidget {
                   _buildBottomNavItem(
                     context,
                     Icons.local_shipping_outlined,
-                    'Rota',
+                    'Percurso',
                     selectedRoute == '/mapa',
                     '/mapa',
                     colorScheme.onPrimary,
@@ -98,7 +90,7 @@ class PuncAppShell extends StatelessWidget {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

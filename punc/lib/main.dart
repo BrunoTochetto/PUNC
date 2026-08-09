@@ -9,7 +9,6 @@ import './source/data/servicos/servico_notificacoes.dart';
 import './source/viewmodels/motorista_view_model.dart';
 import './source/views/configuracao_usuario_page.dart';
 import './source/views/cronograma.dart';
-import './source/views/debug_notificacoes_page.dart';
 import './source/views/localizacao_atual_page.dart';
 import './source/views/mapa_grupos_page.dart';
 import './source/views/motorista_pagina_exemplo.dart';
@@ -60,7 +59,6 @@ Future<void> main() async {
           '/mapa': (_) => const MapaGruposPage(),
           '/localizacao': (_) => const LocalizacaoAtualPage(),
           '/configuracoes': (_) => const ConfiguracaoUsuarioPage(),
-          '/debug-notificacoes': (_) => const DebugNotificacoesPage(),
           '/motorista': (_) => const MotoristaPaginaExemplo(),
         },
       ),

@@ -280,19 +280,6 @@ class _ConfiguracaoConteudoState extends State<_ConfiguracaoConteudo> {
           //         value: true,
           //         onChanged: (value) {},
           //       ),
-          //       const SizedBox(height: 12),
-          //       if (kDebugMode)
-          //         SizedBox(
-          //           width: double.infinity,
-          //           child: OutlinedButton.icon(
-          //             onPressed: () => Navigator.pushNamed(
-          //               context,
-          //               '/debug-notificacoes',
-          //             ),
-          //             icon: const Icon(Icons.bug_report_outlined),
-          //             label: const Text('Abrir depuração de notificações'),
-          //           ),
-          //         ),
           //     ],
           //   ),
           // ),

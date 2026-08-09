@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100svh;
+            overflow: hidden;
+            background: black;
+        }
+
+        .layer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            z-index: 1;
+            visibility: hidden;
+        }
+
+        .layer.active {
+            z-index: 2;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .layer.inactive {
+            z-index: 1;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .layer video,
+        .layer img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div onclick="cycle(true)" id="front" class="layer active">
+        <video class="videosObj"></video>
+    </div>
+
+    <div onclick="cycle(true)" id="back" class="layer inactive">
+        <video class="videosObj"></video>
+    </div>
+</body>
+</html>
